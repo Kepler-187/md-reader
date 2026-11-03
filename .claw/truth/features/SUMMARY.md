@@ -10,3 +10,6 @@
 - [md-reader-file-tree-document-move-and-path-mutation-boundary.md]: 同时覆盖文件树操作的即时反馈边界：`statusMessage` 负责持久状态文案，`actionToast` 负责新建、复制、重命名、删除、移动等动作的即时回执，目录 drop 命中态应以整行高亮和强调条表达可投放区域，并为重命名/创建副本提供统一的行内编辑体验。
 - [md-reader-file-tree-document-move-and-path-mutation-boundary.md]: 有效内部拖拽进入文件树上下 `48px` 边缘时由捕获阶段记录意图并经帧调度连续滚动；每次实际滚动后须重新命中行或尾部刷新落点，且绝不自行提交排序或路径移动。
 - [md-reader-document-link-and-deep-link-unimplemented-boundary.md](md-reader-document-link-and-deep-link-unimplemented-boundary.md): 记录只读 Markdown 预览的项目内文档导航、规范分享深链与标题定位边界：内部链接必须经过 `contentRoots` 和文件树校验，普通点击先保存再导航，修饰点击保留规范 URL 的浏览器原生行为，当前文档锚点不保存也不重载，文件树、编辑器链接、旧裸路径与改名移动引用不在范围内。
+- [md-reader-project-list-management.md](md-reader-project-list-management.md)：当前 Profile 的添加、仅注销登记、数组持久顺序、当前项安全移除、最后清空；跨进程事务锁、版本协调与草稿／迟到回包保护。
+
+- [md-reader-tab-capacity-and-pinning.md](md-reader-tab-capacity-and-pinning.md)：记录未固定标签上限、固定状态、按打开先后安全淘汰和延迟处理超额的边界。

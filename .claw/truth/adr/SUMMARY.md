@@ -41,3 +41,5 @@
 - [0039-md-reader-directory-favorites-share-path-model-and-visible-subtree-projection.md](0039-md-reader-directory-favorites-share-path-model-and-visible-subtree-projection.md): 确认目录收藏复用 `WorkspaceProfile.navigation.favoritePaths` 路径模型；收藏投影位于隐藏可见性之后、搜索之前，目录收藏保留完整可见子树，文件收藏保留祖先上下文，刷新/加载清理失效收藏路径而不处理目录路径迁移。
 - [0040-md-reader-file-tree-edge-auto-scroll-capture-frame-loop-and-drop-target-rehit.md](0040-md-reader-file-tree-edge-auto-scroll-capture-frame-loop-and-drop-target-rehit.md): 确认文件树边缘自动滚动由捕获阶段记录指针和意图、帧循环推进以及每次实际滚动后的落点重命中组成；它不改变同父级排序或目录真实移动的既有语义，也不自行提交持久化操作。
 - [0041-md-reader-document-link-and-deep-link-first-release-contract.md](0041-md-reader-document-link-and-deep-link-first-release-contract.md): 确认首版文档内链接与深链使用 `project`、`profile`、`path` 查询参数与 heading ID fragment；只读预览的无修饰左键走应用内保存导航，修饰点击使用规范分享 URL，且不改变文件树切换、编辑器链接、旧裸 `.md` 路由或改名移动引用。
+
+- [0042-md-reader-tab-capacity-pinning-safe-eviction.md](0042-md-reader-tab-capacity-pinning-safe-eviction.md)：确认按项目和 Profile 设置未固定标签上限，以会话固定状态与打开顺序执行安全淘汰。
