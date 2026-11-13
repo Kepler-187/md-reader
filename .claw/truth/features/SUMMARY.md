@@ -13,4 +13,4 @@
 - [md-reader-project-list-management.md](md-reader-project-list-management.md)：当前 Profile 的添加、仅注销登记、数组持久顺序、当前项安全移除、最后清空；跨进程事务锁、版本协调与草稿／迟到回包保护。
 
 - [md-reader-tab-capacity-and-pinning.md](md-reader-tab-capacity-and-pinning.md)：记录未固定标签上限、固定状态、按打开先后安全淘汰和延迟处理超额的边界。
-- [md-reader-wiki-links-and-graph-boundary.md](md-reader-wiki-links-and-graph-boundary.md): 记录双链与关系图谱的长期边界：双链必须在 AST 层由 remark 插件把 `[[…]]` 改写成标准 `link` 节点（正则会把 code block 与 inline code 一并转掉）、`REMARK_PLUGINS` 顺序固定为 gfm → wikiLinks → headingIds、链接索引必须由服务端出（fs 逐篇拉取在千篇规模不可接受）并按 mtime 缓存、图谱不得做成标签页（标签页模型依赖一标签一文件路径）、布局必须同步跑完再交给渲染层、`src/graph` 三份 mechanics 拷贝只允许改 import 路径、TS 侧走 allowJs + 调用处 any 不维护 d.ts。
+- [md-reader-wiki-links-and-graph-boundary.md](md-reader-wiki-links-and-graph-boundary.md): 双链独立 AST 改写且不依赖索引；图谱前端已接线，但服务端 link-index 实现和 bridge 路由尚未入库，仓库图谱数据不可用；记录待补齐文件、路由位置和验收边界，以及中间区模式、同步布局与 mechanics 复用约束。

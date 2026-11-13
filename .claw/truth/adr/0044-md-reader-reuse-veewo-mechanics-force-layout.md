@@ -1,4 +1,4 @@
-# 0041 · 力导向布局复用 @veewo/mechanics，不自研
+# 0044 · 力导向布局复用 @veewo/mechanics，不自研
 
 ## 背景
 
@@ -9,7 +9,7 @@
 
 ## 决策
 
-采用 **B**，引入三个文件：
+采用 **B**。布局代码已经入库，但端到端图谱仍被服务端索引缺口阻断，见 [Feature Truth](../features/md-reader-wiki-links-and-graph-boundary.md)。引入三个文件：
 
 - `force-simulation.mjs`（391 行）
 - `force-geometry.mjs`（201 行）
@@ -17,7 +17,7 @@
 
 放在 `src/graph/` 下，**只改 import 路径**，逻辑原样保留。
 
-## 理由
+## 备选方案与取舍
 
 ### 参数是在真实画布上调过的
 
@@ -39,9 +39,9 @@
 
 ### 复杂度匹配
 
-读取图的结构只需 `{nodes: [{id}], edges: [{id, source, target}]}`，和「文件节点 + 引用边」天然对应，不需要中间转换层。
+读取图的结构只需 `{nodes: [{id}], edges: [{id, source, target}]}`，和「文件节点 + 引用边」天然对应，只需 `forceAdapter.ts` 中的轻量适配与自环、悬空端点清理。
 
-## 代价
+## 后果与代价
 
 ### 同步跑完，不是实时仿真
 
