@@ -14,3 +14,4 @@
 
 - [md-reader-tab-capacity-and-pinning.md](md-reader-tab-capacity-and-pinning.md)：记录未固定标签上限、固定状态、按打开先后安全淘汰和延迟处理超额的边界。
 - [md-reader-wiki-links-and-graph-boundary.md](md-reader-wiki-links-and-graph-boundary.md): 双链独立 AST 改写且不依赖索引；图谱前端已接线，但服务端 link-index 实现和 bridge 路由尚未入库，仓库图谱数据不可用；记录待补齐文件、路由位置和验收边界，以及中间区模式、同步布局与 mechanics 复用约束。
+- [md-reader-graph-interaction-and-state-boundary.md](md-reader-graph-interaction-and-state-boundary.md): 记录图谱交互与视图状态的 11 条长期规则：渲染必须用 Canvas（锥形缎带与弧长光点 SVG 表达不了）、配色走 `forceNodePalette`、点击与拖动靠 4px 位移区分、`pointerdown` 不得 `dragStart`、恢复布局不建引擎、`hitTest` 必须传真实边、信息面板必须在容器上拦指针事件（否则点按钮先冒泡被当成点空白、选中被清空而按钮失效）、状态按项目分桶、拓扑变化丢坐标、排帧用 `setTimeout` 兜住后台暂停 rAF、进入文章强制切阅读态；已知缺口含节点不可键盘导航。

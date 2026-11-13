@@ -45,3 +45,5 @@
 - [0042-md-reader-tab-capacity-pinning-safe-eviction.md](0042-md-reader-tab-capacity-pinning-safe-eviction.md)：确认按项目和 Profile 设置未固定标签上限，以会话固定状态与打开顺序执行安全淘汰。
 - [0043-md-reader-graph-as-center-mode-not-tab.md](0043-md-reader-graph-as-center-mode-not-tab.md): 确认关系图谱用顶栏模式切换占用中间文档区，不做成标签页；标签页模型依赖「一个标签一个文件路径」，图谱用途是跳转而非停留，改标签页模型比加模式切换贵一个量级。
 - [0044-md-reader-reuse-veewo-mechanics-force-layout.md](0044-md-reader-reuse-veewo-mechanics-force-layout.md): 确认力导向布局复用 `@veewo/mechanics` 的 force-simulation / force-geometry / read-graph-integrity 三份纯计算实现，只改 import 路径不改逻辑；参数是真实画布调过的，自研调参成本高；同步跑完不暴露中间态，TS 侧走 allowJs + 调用处 any 不维护 d.ts。
+- [0045-md-reader-graph-render-canvas-port-drawforceraster.md](0045-md-reader-graph-render-canvas-port-drawforceraster.md): 确认图谱渲染改用单 Canvas 并逐项移植 mechanics 的 `drawForceRaster`；手感差异不在配色而在每帧做什么（锥形缎带、沿弧长光点、分档外晕、标签避让），SVG 表达不了；代价是失去节点键盘可达性与更早的节点数上限。
+- [0046-md-reader-graph-view-state-per-project.md](0046-md-reader-graph-view-state-per-project.md): 确认图谱视图状态（坐标/相机/固定选中/拓扑指纹）按项目分桶保存于 `graphViewStore`；指纹相同则复用坐标与相机、不同则丢弃坐标但保留仍存在的选中；恢复时不建仿真引擎、`pointerdown` 不 `dragStart`，否则冷却会把恢复的布局推歪。
