@@ -575,7 +575,18 @@ export function GraphView({
         ) : null}
 
         {panelNode ? (
-          <aside className="graph-view__panel" data-pinned={panelPinned || undefined}>
+          <aside
+            className="graph-view__panel"
+            data-pinned={panelPinned || undefined}
+            // 面板浮在画布上方，但仍是画布的子节点。不拦住指针事件的话，
+            // 点按钮会先被画布当成「点空白」而清空选中，按钮随即 disabled，
+            // 这次 click 就永远不会触发。三个事件都要拦。
+            onPointerDown={(event) => event.stopPropagation()}
+            onPointerUp={(event) => event.stopPropagation()}
+            onPointerMove={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+            onWheel={(event) => event.stopPropagation()}
+          >
             <div className="graph-view__panel-head">
               <strong>{panelNode.title}</strong>
               <span className="graph-view__panel-badge">{panelPinned ? '已固定' : '悬停'}</span>
