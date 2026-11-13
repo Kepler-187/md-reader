@@ -87,6 +87,7 @@ interface AppShellProps {
   graphLoading?: boolean
   graphError?: string | null
   onToggleGraph?: () => void
+  onReturnToGraph?: () => void
   onCloseGraph?: () => void
   onRefreshGraph?: () => void
   graphProjectId?: string | null
@@ -226,6 +227,7 @@ export function AppShell(props: AppShellProps) {
         graphIndex={props.graphIndex}
         graphLoading={props.graphLoading}
         graphError={props.graphError}
+        onReturnToGraph={props.onReturnToGraph}
         onCloseGraph={props.onCloseGraph}
         onRefreshGraph={props.onRefreshGraph}
         graphProjectId={props.graphProjectId}

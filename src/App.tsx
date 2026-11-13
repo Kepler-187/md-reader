@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 
+import { readGraphViewState, writeGraphViewState } from './graph/graphViewStore'
+import { isNavigationNode } from './graph/linkGraphAdapter'
+
 import { ActionDialog } from './app/ActionDialog'
 import { ProjectManager } from './app/ProjectManager'
 import { RegistryRequestError, type ProjectsSnapshot } from './workspace/project-registry-contract'
@@ -429,6 +432,9 @@ function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null)
   const [graphOpen, setGraphOpen] = useState(false)
   const [graphIndex, setGraphIndex] = useState<LinkIndexPayload | null>(null)
+  const graphIndexCache = useRef(new Map<string, Promise<LinkIndexPayload>>())
+  const graphContentVersions = useRef(new Map<string, string>())
+  const [graphIndexKey, setGraphIndexKey] = useState('')
   const [graphLoading, setGraphLoading] = useState(false)
   const [graphError, setGraphError] = useState<string | null>(null)
   const [pendingProjectId, setPendingProjectId] = useState<string | null>(null)
@@ -2635,32 +2641,63 @@ function App() {
     }
   }
 
-  /** 拉一次链接索引。图谱打开时调，失败不清空旧数据。 */
-  async function loadGraphIndex() {
-    if (!activeProjectId) {
-      setGraphError('还没有接入任何项目')
-      return
+  // One request per project/profile shared by the graph and document relations.
+  const loadGraphIndex = useCallback(async (refresh = false) => {
+    if (!activeProjectId) return
+    const key = JSON.stringify([activeProjectId, activeProfileId])
+    if (refresh) graphIndexCache.current.delete(key)
+    let request = graphIndexCache.current.get(key)
+    if (!request) {
+      request = Promise.resolve().then(() => getLinkIndexFromBridge(activeProjectId, activeProfileId))
+      graphIndexCache.current.set(key, request)
     }
+    const current = () => activeProjectIdRef.current === activeProjectId && activeProfileIdRef.current === activeProfileId
+      && graphIndexCache.current.get(key) === request
     setGraphLoading(true)
     setGraphError(null)
     try {
-      const payload = await getLinkIndexFromBridge(activeProjectId, activeProfileId)
-      setGraphIndex(payload)
+      const payload = await request
+      if (current()) { setGraphIndex(payload); setGraphIndexKey(key) }
     } catch (error) {
-      setGraphError(
-        error instanceof Error ? `读取链接索引失败：${error.message}` : '读取链接索引失败',
-      )
+      if (current()) {
+        graphIndexCache.current.delete(key)
+        setGraphLoading(false)
+        setGraphError(error instanceof Error ? `读取链接索引失败：${error.message}` : '读取链接索引失败')
+      }
     } finally {
-      setGraphLoading(false)
+      if (current()) setGraphLoading(false)
     }
-  }
+  }, [activeProjectId, activeProfileId])
+
+  useEffect(() => {
+    if (!currentDocumentPath || currentDocumentContent == null) return
+    const key = JSON.stringify([activeProjectId, activeProfileId, currentDocumentPath])
+    const previous = graphContentVersions.current.get(key)
+    graphContentVersions.current.set(key, currentDocumentContent)
+    void loadGraphIndex(previous !== undefined && previous !== currentDocumentContent)
+  }, [activeProjectId, activeProfileId, currentDocumentPath, currentDocumentContent, loadGraphIndex])
 
   function handleToggleGraph() {
-    setGraphOpen((prev) => {
-      const next = !prev
-      if (next) void loadGraphIndex()
-      return next
+    if (!graphOpen) void loadGraphIndex()
+    setGraphOpen(!graphOpen)
+  }
+
+  function handleReturnToGraph() {
+    if (!activeProjectId || !currentDocumentPath) return
+    const includeNavigation = isNavigationNode(currentDocumentPath) || (readGraphViewState(activeProjectId)?.includeNavigation ?? false)
+    const connected = graphIndex?.edges.some(edge =>
+      (edge.source === currentDocumentPath || edge.target === currentDocumentPath)
+      && (includeNavigation || (!isNavigationNode(edge.source) && !isNavigationNode(edge.target))))
+    writeGraphViewState(activeProjectId, {
+      selectedId: currentDocumentPath,
+      includeNavigation,
+      includeIsolated: !connected || (readGraphViewState(activeProjectId)?.includeIsolated ?? false),
     })
+    window.getSelection()?.removeAllRanges()
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    setSession(current => ({ ...current, mode: 'regular', regularViewState: 'locked' }))
+    setGraphOpen(true)
+    void loadGraphIndex()
   }
 
   /** 图谱里点节点：打开那篇文档，并退回文档视图 */
@@ -3250,12 +3287,13 @@ function App() {
         onReconnectService={handleReconnectService}
         onStopService={handleStopService}
         graphOpen={graphOpen}
-        graphIndex={graphIndex}
+        graphIndex={graphIndexKey === JSON.stringify([activeProjectId, activeProfileId]) ? graphIndex : null}
         graphLoading={graphLoading}
         graphError={graphError}
         onToggleGraph={handleToggleGraph}
         onCloseGraph={() => setGraphOpen(false)}
-        onRefreshGraph={() => void loadGraphIndex()}
+        onRefreshGraph={() => void loadGraphIndex(true)}
+        onReturnToGraph={handleReturnToGraph}
         graphProjectId={activeProjectId}
         onGraphEnterDocument={handleGraphEnterDocument}
         onDocumentSelect={handleDocumentSelect}

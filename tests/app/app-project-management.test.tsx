@@ -12,6 +12,7 @@ vi.mock('../../src/workspace/local-state', () => ({ createLocalStateStore: () =>
   getState: async () => ({ openDocumentPaths: ['docs/guide.md'], activeDocumentPath: 'docs/guide.md', activeMode: 'regular', regularViewState: 'editable' }), saveState: async () => {}, updateState: async () => {},
 }) }))
 vi.mock('../../src/workspace/local-bridge-access', () => ({
+  getLinkIndexFromBridge: vi.fn().mockResolvedValue({ nodes: [], edges: [], backlinks: {}, broken: [], titles: {}, scannedAt: '', documentCount: 0 }),
   BridgeDocumentConflictError: class extends Error {}, BridgeDocumentSavedCacheInvalidationError: class extends Error {},
   getLocalBridgeHealth: async () => ({ ok: true, mode: 'local-service', port: 8797 }),
   listProjectsFromBridge: api.list, registerProjectWithBridge: api.register, setActiveProjectWithBridge: api.active,

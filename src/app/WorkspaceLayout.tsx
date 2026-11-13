@@ -29,6 +29,7 @@ import {
 
 import { getFileTreeEdgeScrollDelta, createInitialExpandedDirectories, formatFileTreeDisplayName } from './workspace-file-tree-utils'
 import { findActiveHeadingId, type HeadingTarget } from './outline-active-heading'
+import { DocumentBacklinksPanel } from './DocumentBacklinksPanel'
 import { GraphView } from '../graph/GraphView'
 import type { LinkIndexPayload } from '../workspace/local-bridge-access'
 import { VisualMarkdownEditor } from '../editor/visual-markdown-editor'
@@ -190,6 +191,7 @@ interface WorkspaceLayoutProps {
   graphIndex?: LinkIndexPayload | null
   graphLoading?: boolean
   graphError?: string | null
+  onReturnToGraph?: () => void
   onCloseGraph?: () => void
   onRefreshGraph?: () => void
   graphProjectId?: string | null
@@ -1702,6 +1704,7 @@ export function WorkspaceLayout({
   graphIndex = null,
   graphLoading = false,
   graphError = null,
+  onReturnToGraph,
   onCloseGraph,
   onRefreshGraph,
   graphProjectId = null,
@@ -2519,6 +2522,7 @@ export function WorkspaceLayout({
           <div ref={canvasRef} className="panel__content panel__content--canvas">
             {graphOpen ? (
               <GraphView
+                key={graphProjectId}
                 index={graphIndex}
                 loading={graphLoading}
                 error={graphError}
@@ -2591,6 +2595,9 @@ export function WorkspaceLayout({
               <p className="panel__empty">当前文档没有可用标题节点。</p>
             )}
           </div>
+          <DocumentBacklinksPanel index={graphIndex} path={currentDocumentPath} loading={graphLoading} error={graphError}
+            graphOpen={graphOpen} onNavigate={path => onGraphEnterDocument?.(path)} onReturnToGraph={() => onReturnToGraph?.()}
+            onRefresh={() => onRefreshGraph?.()} />
         </div>
       </aside>
       {OUTLINE_PERF_ENABLED ? (

@@ -3143,3 +3143,13 @@ select {
   opacity: 0.45;
   cursor: default;
 }
+
+/* Independent outline/relations scrolling keeps both halves available. */
+.panel--outline > .panel__content--outline { flex: 1 1 50%; min-height: 0; }
+.document-relations { flex: 1 1 50%; min-height: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.document-relations__header { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 0; flex: 0 0 auto; }
+.document-relations__header strong { margin-right: auto; }
+.document-relations__content { min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+.document-relations__content h3 { font-size: 13px; margin: 10px 0 6px; }
+.document-relations__link { display: block; width: 100%; border: 0; background: transparent; color: inherit; text-align: left; padding: 6px 8px; border-radius: 6px; cursor: pointer; overflow-wrap: anywhere; }
+.document-relations__link:hover, .document-relations__link:focus-visible { background: var(--accent-soft); }

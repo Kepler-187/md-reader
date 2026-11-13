@@ -19,7 +19,13 @@ export interface GraphViewOptions {
   /** scope=local 时的跳数，默认 1 */
   hops?: number
   /** 是否显示没有任何连线的孤立节点 */
+  includeNavigation?: boolean
   includeIsolated?: boolean
+}
+
+export function isNavigationNode(filePath: string): boolean {
+  const parts = filePath.replaceAll('\\', '/').split('/')
+  return parts.at(-1)?.toLowerCase() === 'index.md' || parts.slice(0, -1).includes('_MOC')
 }
 
 /** 邻接表（无向，用于计算 N 跳邻居） */
@@ -64,8 +70,11 @@ export function buildGraphView(
   index: LinkIndexPayload,
   options: GraphViewOptions,
 ): GraphLayoutResult {
-  const allIds = index.nodes.map((n) => n.id)
-  const adjacency = buildAdjacency(allIds, index.edges)
+  const visibleNodes = index.nodes.filter(n => options.includeNavigation || !isNavigationNode(n.path))
+  const visibleIds = new Set(visibleNodes.map(n => n.id))
+  const visibleEdges = index.edges.filter(e => visibleIds.has(e.source) && visibleIds.has(e.target))
+  const allIds = [...visibleIds]
+  const adjacency = buildAdjacency(allIds, visibleEdges)
 
   let keep: Set<string> | null = null
 
@@ -76,7 +85,7 @@ export function buildGraphView(
   if (!options.includeIsolated) {
     // 没有连线的节点不画：全库索引里大量模板、孤立笔记会把画面撑散
     const connected = new Set<string>()
-    for (const e of index.edges) {
+    for (const e of visibleEdges) {
       connected.add(e.source)
       connected.add(e.target)
     }
@@ -87,9 +96,9 @@ export function buildGraphView(
     }
   }
 
-  const nodes = index.nodes.filter((n) => (keep ? keep.has(n.id) : true))
+  const nodes = visibleNodes.filter((n) => (keep ? keep.has(n.id) : true))
   const nodeIds = new Set(nodes.map((n) => n.id))
-  const edges = index.edges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
+  const edges = visibleEdges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
 
   return layoutGraph(
     nodes.map((n) => ({ id: n.id, title: n.title, dir: n.dir, tags: n.tags })),

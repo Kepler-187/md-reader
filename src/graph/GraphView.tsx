@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { LinkIndexPayload } from '../workspace/local-bridge-access'
 import { createLiveForceLayout, measurePositions, type LiveForceLayout } from './forceAdapter'
 import { drawGraph, hitTest, resetGraphRenderCache, setGraphLabels, type GraphCamera } from './graphRenderer'
-import { graphTopologyKey, reconcileGraphViewState, writeGraphViewState } from './graphViewStore'
+import { graphTopologyKey, readGraphViewState, reconcileGraphViewState, writeGraphViewState } from './graphViewStore'
 import { buildGraphView, type LaidOutNode } from './linkGraphAdapter'
 
 interface GraphViewProps {
@@ -52,7 +52,8 @@ export function GraphView({
 }: GraphViewProps) {
   const [scope, setScope] = useState<'global' | 'local'>('global')
   const [hops, setHops] = useState(1)
-  const [includeIsolated, setIncludeIsolated] = useState(false)
+  const [includeIsolated, setIncludeIsolated] = useState(() => projectId ? readGraphViewState(projectId)?.includeIsolated ?? false : false)
+  const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? false : false)
 
   /** 固定选中的节点：点击后保留，鼠标移开不消失 */
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -100,12 +101,13 @@ export function GraphView({
         focusPath: currentDocumentPath,
         hops,
         includeIsolated,
+        includeNavigation,
       })
     } catch (err) {
       console.warn('图谱布局失败', err)
       return null
     }
-  }, [index, scope, currentDocumentPath, hops, includeIsolated])
+  }, [index, scope, currentDocumentPath, hops, includeIsolated, includeNavigation])
 
   const nodes: LaidOutNode[] = view?.nodes ?? []
   const edges = view?.edges ?? []
@@ -547,11 +549,21 @@ export function GraphView({
           <input
             type="checkbox"
             checked={includeIsolated}
-            onChange={(event) => setIncludeIsolated(event.target.checked)}
+            onChange={(event) => {
+              setIncludeIsolated(event.target.checked)
+              if (projectId) writeGraphViewState(projectId, { includeIsolated: event.target.checked })
+            }}
           />
           孤立节点
         </label>
 
+        <label className="graph-view__check">
+          <input type="checkbox" checked={includeNavigation} onChange={event => {
+            setIncludeNavigation(event.target.checked)
+            if (projectId) writeGraphViewState(projectId, { includeNavigation: event.target.checked })
+          }} />
+          导航节点
+        </label>
         <div className="graph-view__group graph-view__group--right">
           <span className="graph-view__meta">
             {nodes.length ? `${nodes.length} 节点 · ${edges.length} 连线` : '—'}

@@ -39,6 +39,7 @@ vi.mock('../../src/document-renderer/readonly-markdown-renderer', () => ({
 }))
 
 vi.mock('../../src/workspace/local-bridge-access', () => ({
+  getLinkIndexFromBridge: vi.fn().mockResolvedValue({ nodes: [], edges: [], backlinks: {}, broken: [], titles: {}, scannedAt: '', documentCount: 0 }),
   BridgeDocumentConflictError: class BridgeDocumentConflictError extends Error {},
   BridgeDocumentSavedCacheInvalidationError: class BridgeDocumentSavedCacheInvalidationError extends Error {},
   createDirectoryNodeInBridge: vi.fn(),
