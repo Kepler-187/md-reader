@@ -8,7 +8,7 @@
 
 改用单个 Canvas，逐项移植 mechanics `GraphCanvas.drawForceRaster`（`src/web/canvas.mjs`）。
 
-## 为什么不是"照着调参的 SVG"
+## 备选方案与取舍
 
 手感差异不只在配色，而在**每帧做什么**：
 
@@ -22,13 +22,15 @@
 
 缎带和光点需要按弧长采样（`forceRouteSamples` / `forceRoutePoint`），SVG 的 `<line>` 做不到；用 SVG `<path>` 做渐变带则要为每条边维护 8 段多边形，DOM 数量反而暴涨。
 
-## 代价
+## 后果与代价
 
 **失去 DOM 可访问性。** SVG 节点天然可聚焦、可 Tab、可读屏；Canvas 全都要手写。当前图谱的键盘可达性只有"点画布外"的工具栏按钮，节点本身不可键盘导航。这是明确的已知缺口，不是遗漏。
 
 **节点数上限更早到来。** Canvas 没有 DOM 开销，但同步布局 + 单帧全量重绘在数千节点时会卡。届时要换虚拟化或分块重绘。
 
 **标签宽度依赖 `measureText`**，首帧会有一次全文测量开销；已加缓存（上限 4000 条后清空）。
+
+导航名称必显与完整路径开关是阅读产品的显示规则，不改变 Canvas/力学架构。普通标签保留避让；导航标签绕过隐藏规则，必要时会重叠。当前规则见 [交互 Truth](../features/md-reader-graph-interaction-and-state-boundary.md)。
 
 ## 相关
 

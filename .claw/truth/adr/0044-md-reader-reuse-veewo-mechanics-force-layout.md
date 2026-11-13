@@ -9,7 +9,7 @@
 
 ## 决策
 
-采用 **B**。布局代码已经入库，但端到端图谱仍被服务端索引缺口阻断，见 [Feature Truth](../features/md-reader-wiki-links-and-graph-boundary.md)。引入三个文件：
+采用 **B**。服务端索引及端到端图谱已可用，见 [Feature Truth](../features/md-reader-wiki-links-and-graph-boundary.md)。引入三个上游模块：
 
 - `force-simulation.mjs`（391 行）
 - `force-geometry.mjs`（201 行）
@@ -43,13 +43,13 @@
 
 ## 后果与代价
 
-### 同步跑完，不是实时仿真
+### 初始布局与实时拖动分工
 
-上游实现基于 `requestAnimationFrame` 逐帧推进，配合拖动实时更新。本仓库的用法不同：进入图谱时一次性算完再画。
+适配层保留同步 layoutGraph 数据构建，GraphView 通过 createLiveForceLayout 支持首次布局和实际拖动；有可复用坐标时不创建引擎，真正拖动才按需启动。
 
-`forceAdapter.ts` 的做法是接管 `requestFrame`，把排进来的帧回调攒到队列里自己驱动，跑到 `onSettle` 拿到最终坐标为止（实测 6 节点 214 帧收敛，上限 2000 帧兜底）。这样调用方拿到的是纯数据，不用处理中间态。
+同步路径接管 requestFrame 自驱队列，实时路径复用同一 mechanics 实现。拖动激活所在连通分量，按抓取偏移更新位置；具体生命周期由 [交互 Truth](../features/md-reader-graph-interaction-and-state-boundary.md) 维护。
 
-代价是不支持「拖动节点让图实时重排」。当前图谱不支持节点固定位置，这个功能本来也没做。
+当前支持拖动及邻居随动，但未提供节点永久固定位置功能。标签或显示文字的更新不得改变物理参数。
 
 ### TypeScript 侧是一层 any
 
