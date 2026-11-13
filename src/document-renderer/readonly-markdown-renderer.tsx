@@ -10,6 +10,7 @@ export interface ReadonlyMarkdownRendererProps {
   documentPaths?: Iterable<string>
   contentRoots?: Iterable<string>
   getDocumentLinkHref?: (documentPath: string, headingId: string | null) => string
+  getAssetHref?: (assetPath: string) => string
   onDocumentLinkNavigate?: (documentPath: string, headingId: string | null) => void | Promise<void>
   onCurrentDocumentAnchorNavigate?: (headingId: string) => void
   onInvalidDocumentLink?: (href: string, reason: DocumentLinkInvalidReason) => void
@@ -73,6 +74,7 @@ export function ReadonlyMarkdownRenderer(props: ReadonlyMarkdownRendererProps) {
       documentPaths={props.documentPaths}
       contentRoots={props.contentRoots}
       getDocumentLinkHref={getDocumentLinkHref}
+      getAssetHref={props.getAssetHref}
       onDocumentLinkNavigate={onDocumentLinkNavigate}
       onCurrentDocumentAnchorNavigate={onCurrentDocumentAnchorNavigate}
       onInvalidDocumentLink={onInvalidDocumentLink}
@@ -87,6 +89,7 @@ export function ReadonlyMarkdownRenderer(props: ReadonlyMarkdownRendererProps) {
     props.contentRoots,
     props.currentDocumentPath,
     props.documentPaths,
+    props.getAssetHref,
   ])
 
   if (renderedDocument) return renderedDocument

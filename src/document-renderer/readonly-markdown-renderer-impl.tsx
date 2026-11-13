@@ -1,6 +1,8 @@
 import { isValidElement, useCallback, useEffect, useMemo, useRef, type ComponentPropsWithoutRef, type MouseEvent, type ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkFrontmatter from 'remark-frontmatter'
+import { resolveImageSource } from '../markdown/image-link'
 
 import { createKnownDocumentPathSet, resolveDocumentLink, type DocumentLinkInvalidReason } from '../markdown/document-link'
 import { remarkHeadingIds } from '../markdown/heading-outline'
@@ -9,7 +11,7 @@ import { applyMarkdownTransforms } from '../markdown/markdown-transform'
 import { syncStrongOnlyParagraphClasses } from '../markdown/strong-only-paragraph'
 import { MermaidDiagram } from './mermaid-diagram'
 
-const REMARK_PLUGINS = [remarkGfm, remarkWikiLinks, remarkHeadingIds]
+const REMARK_PLUGINS = [remarkFrontmatter, remarkGfm, remarkWikiLinks, remarkHeadingIds]
 
 interface ReadonlyMarkdownRendererImplProps {
   value: string
@@ -17,6 +19,7 @@ interface ReadonlyMarkdownRendererImplProps {
   documentPaths?: Iterable<string>
   contentRoots?: Iterable<string>
   getDocumentLinkHref?: (documentPath: string, headingId: string | null) => string
+  getAssetHref?: (assetPath: string) => string
   onDocumentLinkNavigate?: (documentPath: string, headingId: string | null) => void | Promise<void>
   onCurrentDocumentAnchorNavigate?: (headingId: string) => void
   onInvalidDocumentLink?: (href: string, reason: DocumentLinkInvalidReason) => void
@@ -45,6 +48,7 @@ export function ReadonlyMarkdownRendererImpl({
   documentPaths = [],
   contentRoots = ['.'],
   getDocumentLinkHref,
+  getAssetHref,
   onDocumentLinkNavigate,
   onCurrentDocumentAnchorNavigate,
   onInvalidDocumentLink,
@@ -119,7 +123,16 @@ export function ReadonlyMarkdownRendererImpl({
     onDocumentLinkNavigate,
     onInvalidDocumentLink,
   ])
-  const components = useMemo(() => ({ pre: renderCodeBlock, a: renderLink }), [renderLink])
+  const renderImage = useCallback(({ src, alt, title }: ComponentPropsWithoutRef<'img'>) => {
+    const resolution = resolveImageSource(typeof src === 'string' ? src : '', currentDocumentPath, contentRoots)
+    const href = resolution.kind === 'external' ? resolution.href
+      : resolution.kind === 'internal' ? getAssetHref?.(resolution.path) : undefined
+    if (!href) {
+      return <span className="markdown-image-unavailable" data-image-error={resolution.kind === 'invalid' ? resolution.reason : 'missing-asset-provider'}>{alt || '图片不可用'}</span>
+    }
+    return <img src={href} alt={alt ?? ''} title={title} loading="lazy" decoding="async" style={{ maxWidth: '100%', height: 'auto' }} />
+  }, [currentDocumentPath, contentRoots, getAssetHref])
+  const components = useMemo(() => ({ pre: renderCodeBlock, a: renderLink, img: renderImage }), [renderLink, renderImage])
 
   useEffect(() => {
     syncStrongOnlyParagraphClasses(rootRef.current)
@@ -135,6 +148,7 @@ export function ReadonlyMarkdownRendererImpl({
       <ReactMarkdown
         remarkPlugins={REMARK_PLUGINS}
         components={components}
+        urlTransform={(url, key, node) => node.tagName === 'img' && key === 'src' ? url : defaultUrlTransform(url)}
       >
         {transformedValue}
       </ReactMarkdown>

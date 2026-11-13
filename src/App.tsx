@@ -47,6 +47,7 @@ import {
   BridgeDocumentSavedCacheInvalidationError,
   moveDocumentNodeInBridge,
   getDocumentContentFromBridge,
+  getProjectAssetHref,
   getProfileFromBridge,
   getFileTreePathsFromBridge,
   getLinkIndexFromBridge,
@@ -2321,6 +2322,10 @@ function App() {
     return createDocumentShareHref(projectId, activeProfileIdRef.current, documentPath, headingId)
   }
 
+  const getAssetHref = useCallback((assetPath: string) => (
+    activeProjectId ? getProjectAssetHref(activeProjectId, activeProfileId, assetPath) : ''
+  ), [activeProjectId, activeProfileId])
+
   function handleInvalidDocumentLink(href: string, reason: string) {
     publishActionFeedback(`无法打开链接「${href}」：${reason}`, 'error')
   }
@@ -3276,6 +3281,7 @@ function App() {
         documentLinkPaths={documentLinkPaths}
         documentLinkContentRoots={projects.find((project) => project.id === activeProjectId)?.contentRoots ?? ['.']}
         getDocumentLinkHref={getDocumentLinkHref}
+        getAssetHref={getAssetHref}
         onDocumentLinkNavigate={handleDocumentLinkNavigate}
         onCurrentDocumentAnchorNavigate={handleCurrentDocumentAnchorNavigate}
         onInvalidDocumentLink={handleInvalidDocumentLink}

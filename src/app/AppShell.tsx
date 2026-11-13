@@ -122,6 +122,7 @@ interface AppShellProps {
   documentLinkPaths?: Iterable<string>
   documentLinkContentRoots?: Iterable<string>
   getDocumentLinkHref?: (documentPath: string, headingId: string | null) => string
+  getAssetHref?: (assetPath: string) => string
   onDocumentLinkNavigate?: (documentPath: string, headingId: string | null) => void | Promise<void>
   onCurrentDocumentAnchorNavigate?: (headingId: string) => void
   onInvalidDocumentLink?: (href: string, reason: DocumentLinkInvalidReason) => void
@@ -261,6 +262,7 @@ export function AppShell(props: AppShellProps) {
         documentLinkPaths={props.documentLinkPaths}
         documentLinkContentRoots={props.documentLinkContentRoots}
         getDocumentLinkHref={props.getDocumentLinkHref}
+        getAssetHref={props.getAssetHref}
         onDocumentLinkNavigate={props.onDocumentLinkNavigate}
         onCurrentDocumentAnchorNavigate={props.onCurrentDocumentAnchorNavigate}
         onInvalidDocumentLink={props.onInvalidDocumentLink}

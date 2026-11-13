@@ -131,7 +131,7 @@ function decodePart(value: string): { ok: true; value: string } | { ok: false; r
   }
 }
 
-function resolveProjectRelativePath(
+export function resolveProjectRelativePath(
   currentDocumentPath: string,
   rawTargetPath: string,
 ): { ok: true; value: string } | { ok: false; reason: DocumentLinkInvalidReason } {
@@ -163,7 +163,7 @@ function resolveProjectRelativePath(
   return { ok: true, value: resolvedSegments.join('/') }
 }
 
-function normalizeContentRoot(root: string): string | null {
+export function normalizeContentRoot(root: string): string | null {
   const value = String(root ?? '').trim().replaceAll('\\', '/')
   if (!value || value === '.') return '.'
   if (value.startsWith('/') || value.split('/').some((segment) => segment === '..')) return null
@@ -178,6 +178,6 @@ function normalizeKnownDocumentPath(documentPath: string): string | null {
   return value
 }
 
-function isWithinContentRoots(documentPath: string, contentRoots: string[]): boolean {
+export function isWithinContentRoots(documentPath: string, contentRoots: string[]): boolean {
   return contentRoots.some((root) => root === '.' || documentPath.startsWith(`${root}/`))
 }

@@ -23,6 +23,7 @@ import {
   renameDocumentNode,
 } from "./project-node-operations.mjs";
 import { readMarkdownDocument } from "./project-reader.mjs";
+import { readProjectAsset } from './project-asset.mjs';
 import { buildLinkIndex } from "./link-index.mjs";
 import { revealMarkdownDocumentInExplorer } from './document-reveal.mjs';
 import { DocumentConflictError, writeMarkdownDocument } from "./project-writer.mjs";
@@ -306,6 +307,17 @@ async function handleRequest(request, response, { runtimeHome, port, stateFile, 
     sendJson(response, 200, {
       profile: await saveProjectProfile(project.rootPath, body.profile ?? body),
     });
+    return;
+  }
+
+  const assetMatch = url.pathname.match(/^\/api\/projects\/([^/]+)\/asset$/);
+  if ((request.method === 'GET' || request.method === 'HEAD') && assetMatch) {
+    const projectId = decodeURIComponent(assetMatch[1]);
+    const project = await getProjectById(runtimeHome, url.searchParams.get('profileId') ?? 'default', projectId);
+    if (!project) { sendJson(response, 404, { error: `Unknown project: ${projectId}` }); return; }
+    const asset = await readProjectAsset(project.rootPath, project.contentRoots, url.searchParams.get('path'), { head: request.method === 'HEAD' });
+    response.writeHead(200, asset.headers);
+    response.end(asset.body);
     return;
   }
 

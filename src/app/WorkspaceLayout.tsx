@@ -176,6 +176,7 @@ interface WorkspaceLayoutProps {
   documentLinkPaths?: Iterable<string>
   documentLinkContentRoots?: Iterable<string>
   getDocumentLinkHref?: (documentPath: string, headingId: string | null) => string
+  getAssetHref?: (assetPath: string) => string
   onDocumentLinkNavigate?: (documentPath: string, headingId: string | null) => void | Promise<void>
   onCurrentDocumentAnchorNavigate?: (headingId: string) => void
   onInvalidDocumentLink?: (href: string, reason: DocumentLinkInvalidReason) => void
@@ -1687,6 +1688,7 @@ export function WorkspaceLayout({
   documentLinkPaths = EMPTY_PATHS,
   documentLinkContentRoots = ['.'],
   getDocumentLinkHref,
+  getAssetHref,
   onDocumentLinkNavigate,
   onCurrentDocumentAnchorNavigate,
   onInvalidDocumentLink,
@@ -2349,6 +2351,7 @@ export function WorkspaceLayout({
           documentPaths={documentLinkPaths}
           contentRoots={documentLinkContentRoots}
           getDocumentLinkHref={getDocumentLinkHref}
+          getAssetHref={getAssetHref}
           onDocumentLinkNavigate={onDocumentLinkNavigate}
           onCurrentDocumentAnchorNavigate={onCurrentDocumentAnchorNavigate}
           onInvalidDocumentLink={onInvalidDocumentLink}

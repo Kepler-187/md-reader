@@ -122,6 +122,11 @@ function getBaseUrl(baseUrl?: string): string {
   return baseUrl ?? DEFAULT_BRIDGE_URL
 }
 
+export function getProjectAssetHref(projectId: string, profileId: string, assetPath: string): string {
+  const query = new URLSearchParams({ profileId, path: assetPath })
+  return `${getBaseUrl()}/api/projects/${encodeURIComponent(projectId)}/asset?${query}`
+}
+
 async function readJsonResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`
