@@ -49,6 +49,8 @@ import {
   getDocumentContentFromBridge,
   getProfileFromBridge,
   getFileTreePathsFromBridge,
+  getLinkIndexFromBridge,
+  type LinkIndexPayload,
   getProjectTreeSnapshotFromBridge,
   refreshFileTreeFromBridge,
   refreshProjectTreeSnapshotFromBridge,
@@ -424,6 +426,10 @@ function getSaveIndicator(
 function App() {
   const [projects, setProjects] = useState<ProjectRegistryRecord[]>([])
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null)
+  const [graphOpen, setGraphOpen] = useState(false)
+  const [graphIndex, setGraphIndex] = useState<LinkIndexPayload | null>(null)
+  const [graphLoading, setGraphLoading] = useState(false)
+  const [graphError, setGraphError] = useState<string | null>(null)
   const [pendingProjectId, setPendingProjectId] = useState<string | null>(null)
   const [profileIds, setProfileIds] = useState(['default'])
   const [activeProfileId, setActiveProfileId] = useState('default')
@@ -2624,6 +2630,40 @@ function App() {
     }
   }
 
+  /** 拉一次链接索引。图谱打开时调，失败不清空旧数据。 */
+  async function loadGraphIndex() {
+    if (!activeProjectId) {
+      setGraphError('还没有接入任何项目')
+      return
+    }
+    setGraphLoading(true)
+    setGraphError(null)
+    try {
+      const payload = await getLinkIndexFromBridge(activeProjectId, activeProfileId)
+      setGraphIndex(payload)
+    } catch (error) {
+      setGraphError(
+        error instanceof Error ? `读取链接索引失败：${error.message}` : '读取链接索引失败',
+      )
+    } finally {
+      setGraphLoading(false)
+    }
+  }
+
+  function handleToggleGraph() {
+    setGraphOpen((prev) => {
+      const next = !prev
+      if (next) void loadGraphIndex()
+      return next
+    })
+  }
+
+  /** 图谱里点节点：打开那篇文档，并退回文档视图 */
+  function handleGraphDocumentSelect(path: string) {
+    setGraphOpen(false)
+    void handleDocumentSelect(path)
+  }
+
   async function handleDocumentSelect(path: string) {
     return openDocument(path, true)
   }
@@ -3194,7 +3234,14 @@ function App() {
         onRestartService={handleRestartService}
         onReconnectService={handleReconnectService}
         onStopService={handleStopService}
-        onDocumentSelect={handleDocumentSelect}
+        graphOpen={graphOpen}
+        graphIndex={graphIndex}
+        graphLoading={graphLoading}
+        graphError={graphError}
+        onToggleGraph={handleToggleGraph}
+        onCloseGraph={() => setGraphOpen(false)}
+        onRefreshGraph={() => void loadGraphIndex()}
+        onDocumentSelect={graphOpen ? handleGraphDocumentSelect : handleDocumentSelect}
         onDocumentScrollTopChange={handleDocumentScrollTopChange}
         onCreateDocument={handleCreateDocument}
         onCreateDirectory={handleCreateDirectory}

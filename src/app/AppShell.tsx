@@ -82,6 +82,13 @@ interface AppShellProps {
   onRestartService?: () => void
   onReconnectService?: () => void
   onStopService?: () => void
+  graphOpen?: boolean
+  graphIndex?: import('../workspace/local-bridge-access').LinkIndexPayload | null
+  graphLoading?: boolean
+  graphError?: string | null
+  onToggleGraph?: () => void
+  onCloseGraph?: () => void
+  onRefreshGraph?: () => void
   onDocumentSelect: (path: string) => void
   onDocumentScrollTopChange?: (documentPath: string, scrollTop: number) => void
   onCreateDocument?: (directoryPath?: string) => void | Promise<void>
@@ -164,6 +171,8 @@ export function AppShell(props: AppShellProps) {
         onProjectChange={props.onProjectChange}
         onProfileChange={props.onProfileChange}
         onModeChange={props.onModeChange}
+        graphOpen={props.graphOpen}
+        onToggleGraph={props.onToggleGraph}
         onToggleRegularLock={props.onToggleRegularLock}
         showHiddenItems={props.showHiddenItems}
         onToggleShowHiddenItems={props.onToggleShowHiddenItems}
@@ -210,6 +219,12 @@ export function AppShell(props: AppShellProps) {
         hideFileTitleDate={props.hideFileTitleDate}
         hasProjects={props.projects.length > 0}
         isWorkspaceBootstrapping={props.isWorkspaceBootstrapping}
+        graphOpen={props.graphOpen}
+        graphIndex={props.graphIndex}
+        graphLoading={props.graphLoading}
+        graphError={props.graphError}
+        onCloseGraph={props.onCloseGraph}
+        onRefreshGraph={props.onRefreshGraph}
         onDocumentSelect={props.onDocumentSelect}
         onDocumentScrollTopChange={props.onDocumentScrollTopChange}
         onCreateDocument={props.onCreateDocument}

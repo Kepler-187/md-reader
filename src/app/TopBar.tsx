@@ -6,6 +6,7 @@ import {
   FolderSync,
   Lock,
   LockOpen,
+  Network,
   PanelTop,
   Pin,
   Plus,
@@ -61,6 +62,8 @@ interface TopBarProps {
   onProjectChange: (projectId: string) => void
   onProfileChange: (profileId: string) => void
   onModeChange: (mode: WorkspaceMode) => void
+  graphOpen?: boolean
+  onToggleGraph?: () => void
   onToggleRegularLock: () => void
   showHiddenItems?: boolean
   onToggleShowHiddenItems?: () => void
@@ -401,6 +404,8 @@ export function TopBar({
   onProjectChange,
   onProfileChange,
   onModeChange,
+  graphOpen = false,
+  onToggleGraph,
   onToggleRegularLock,
   showHiddenItems = false,
   onToggleShowHiddenItems,
@@ -954,6 +959,19 @@ export function TopBar({
                   </span>
                 </button>
               ))}
+              <button
+                type="button"
+                className="topbar__mode"
+                aria-pressed={graphOpen}
+                aria-label="关系图谱"
+                title={graphOpen ? '关闭图谱' : '关系图谱'}
+                onClick={onToggleGraph}
+                disabled={!onToggleGraph}
+              >
+                <span className="topbar__icon" aria-hidden="true">
+                  <Network />
+                </span>
+              </button>
             </div>
           </div>
 

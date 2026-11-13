@@ -29,6 +29,8 @@ import {
 
 import { getFileTreeEdgeScrollDelta, createInitialExpandedDirectories, formatFileTreeDisplayName } from './workspace-file-tree-utils'
 import { findActiveHeadingId, type HeadingTarget } from './outline-active-heading'
+import { GraphView } from '../graph/GraphView'
+import type { LinkIndexPayload } from '../workspace/local-bridge-access'
 import { VisualMarkdownEditor } from '../editor/visual-markdown-editor'
 import { EDITOR_STRUCTURE_UPDATED_EVENT } from '../editor/editor-structure-events'
 import { ReadonlyMarkdownRenderer } from '../document-renderer/readonly-markdown-renderer'
@@ -183,6 +185,12 @@ interface WorkspaceLayoutProps {
   onSidebarWidthCommit: (width: number) => void | Promise<void>
   onOutlineWidthChange: (width: number) => void
   onOutlineWidthCommit: (width: number) => void | Promise<void>
+  graphOpen?: boolean
+  graphIndex?: LinkIndexPayload | null
+  graphLoading?: boolean
+  graphError?: string | null
+  onCloseGraph?: () => void
+  onRefreshGraph?: () => void
 }
 
 export interface WorkspaceActionToast {
@@ -1686,6 +1694,12 @@ export function WorkspaceLayout({
   onSidebarWidthCommit,
   onOutlineWidthChange,
   onOutlineWidthCommit,
+  graphOpen = false,
+  graphIndex = null,
+  graphLoading = false,
+  graphError = null,
+  onCloseGraph,
+  onRefreshGraph,
 }: WorkspaceLayoutProps) {
   const documentTitle = currentDocumentPath?.split('/').at(-1) ?? null
   const activeDocumentContent =
@@ -2496,7 +2510,17 @@ export function WorkspaceLayout({
       <section className="workspace__center" inert={isWorkspaceInputBlocked || undefined} aria-hidden={isProjectSwitching || undefined}>
         <div className="panel panel--canvas">
           <div ref={canvasRef} className="panel__content panel__content--canvas">
-            {currentDocumentPath ? (
+            {graphOpen ? (
+              <GraphView
+                index={graphIndex}
+                loading={graphLoading}
+                error={graphError}
+                currentDocumentPath={currentDocumentPath}
+                onDocumentSelect={onDocumentSelect}
+                onClose={() => onCloseGraph?.()}
+                onRefresh={() => onRefreshGraph?.()}
+              />
+            ) : currentDocumentPath ? (
               <div className="workspace__document">
                 <div className="workspace__document-meta">
                   <strong>{documentTitle}</strong>
