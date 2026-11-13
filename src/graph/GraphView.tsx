@@ -558,11 +558,11 @@ export function GraphView({
         </label>
 
         <label className="graph-view__check">
-          <input type="checkbox" checked={includeNavigation} onChange={event => {
-            setIncludeNavigation(event.target.checked)
-            if (projectId) writeGraphViewState(projectId, { includeNavigation: event.target.checked })
+          <input type="checkbox" checked={!includeNavigation} onChange={event => {
+            setIncludeNavigation(!event.target.checked)
+            if (projectId) writeGraphViewState(projectId, { includeNavigation: !event.target.checked })
           }} />
-          导航节点
+          过滤导航节点
         </label>
         <div className="graph-view__group graph-view__group--right">
           <span className="graph-view__meta">

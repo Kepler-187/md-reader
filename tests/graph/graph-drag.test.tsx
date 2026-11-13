@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { GraphView } from '../../src/graph/GraphView'
 import { computeFocus } from '../../src/graph/graphRenderer'
-import { clearGraphViewState, graphTopologyKey, writeGraphViewState } from '../../src/graph/graphViewStore'
+import { clearGraphViewState, graphTopologyKey, readGraphViewState, writeGraphViewState } from '../../src/graph/graphViewStore'
 
 vi.mock('../../src/graph/graphRenderer', async (original) => ({
   ...await original<typeof import('../../src/graph/graphRenderer')>(),
@@ -17,6 +17,21 @@ const index = { nodes, edges, backlinks: {}, titles: {}, broken: [], scannedAt: 
 const props = { index, projectId: 'drag-regression', loading: false, error: null, currentDocumentPath: 'a.md', onCloseGraph: vi.fn(), onRefreshGraph: vi.fn(), onEnterDocument: vi.fn() }
 const debug = () => (window as any).__graphDebug
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms))
+
+it('checks navigation filtering on first open and restores an explicit change from the store', () => {
+  clearGraphViewState(props.projectId)
+  const first = render(<GraphView {...props} />)
+  const filter = screen.getByRole('checkbox', { name: '过滤导航节点' })
+  expect(filter).toBeChecked()
+  fireEvent.click(filter)
+  expect(filter).not.toBeChecked()
+  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(true)
+  first.unmount()
+  render(<GraphView {...props} />)
+  expect(screen.getByRole('checkbox', { name: '过滤导航节点' })).not.toBeChecked()
+  fireEvent.click(screen.getByRole('checkbox', { name: '过滤导航节点' }))
+  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(false)
+})
 
 beforeEach(() => {
   vi.useFakeTimers()
