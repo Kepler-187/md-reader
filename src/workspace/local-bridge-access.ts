@@ -587,3 +587,47 @@ async function postDocumentPathMutation(
 
   return readJsonResponse<BridgeNodePayload>(response)
 }
+
+export interface LinkIndexNode {
+  id: string
+  path: string
+  title: string
+  tags: string[]
+  dir: string
+}
+
+export interface LinkIndexEdge {
+  source: string
+  target: string
+  kind: 'wiki' | 'markdown'
+}
+
+export interface LinkIndexBacklink {
+  path: string
+  title: string
+  kind: 'wiki' | 'markdown'
+  snippet: string | null
+}
+
+export interface LinkIndexPayload {
+  nodes: LinkIndexNode[]
+  edges: LinkIndexEdge[]
+  backlinks: Record<string, LinkIndexBacklink[]>
+  broken: { from: string; path: string; raw: string; kind: string }[]
+  titles: Record<string, string[]>
+  scannedAt: string
+  documentCount: number
+}
+
+export async function getLinkIndexFromBridge(
+  projectId: string,
+  profileId: string,
+  options: FetchOptions = {},
+): Promise<LinkIndexPayload> {
+  const fetchImpl = getFetch(options.fetchImpl)
+  const baseUrl = getBaseUrl(options.baseUrl)
+  const response = await fetchImpl(
+    `${baseUrl}/api/projects/${encodeURIComponent(projectId)}/link-index?profileId=${encodeURIComponent(profileId)}`,
+  )
+  return readJsonResponse<LinkIndexPayload>(response)
+}
