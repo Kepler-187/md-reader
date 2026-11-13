@@ -52,8 +52,67 @@ function toProjectPath(rawTarget, fromPath) {
   return path.posix.normalize(joined).replaceAll("\\", "/");
 }
 
+/** Mask code without dependencies: vendor/server runs outside the Vite bundle.
+ * Keep line breaks and offsets; unmatched inline backticks remain literal text.
+ */
+function withoutCode(content) {
+  const mask = (value) => value.replace(/[^\r\n]/g, " ");
+  let fence = null;
+  const lines = content.split(/(?<=\n)/).map((line) => {
+    // Quoted fences use the same delimiters as ordinary fenced blocks.
+    const body = line.replace(/^(?: {0,3}>[ \t]?)+/, "");
+    if (fence) {
+      const close = body.match(/^ {0,3}(`+|~+)[ \t]*(?:\r?\n)?$/);
+      if (close && close[1][0] === fence.char && close[1].length >= fence.length) fence = null;
+      return mask(line);
+    }
+    const open = body.match(/^ {0,3}(`{3,}|~{3,})([^\r\n]*)/);
+    if (open && !(open[1][0] === "`" && open[2].includes("`"))) {
+      fence = { char: open[1][0], length: open[1].length };
+      return mask(line);
+    }
+    return line;
+  }).join("");
+
+  // Pair exact-length backtick runs, including multiline code spans. Escapes
+  // apply to openers, but backslashes have no escaping role inside code spans.
+  const runs = [...lines.matchAll(/`+/g)];
+  const next = new Array(runs.length).fill(-1);
+  const byLength = new Map();
+  for (let i = runs.length - 1; i >= 0; i--) {
+    // Inline spans cannot cross a blank-line paragraph boundary.
+    if (i + 1 < runs.length && /\r?\n[ \t]*\r?\n/.test(
+      lines.slice(runs[i].index + runs[i][0].length, runs[i + 1].index),
+    )) byLength.clear();
+    next[i] = byLength.get(runs[i][0].length) ?? -1;
+    byLength.set(runs[i][0].length, i);
+  }
+  let result = "";
+  let cursor = 0;
+  for (let i = 0; i < runs.length; i++) {
+    const start = runs[i].index;
+    let slashes = 0;
+    for (let j = start - 1; j >= 0 && lines[j] === "\\"; j--) slashes++;
+    if (slashes % 2 || next[i] < 0) continue;
+    const endRun = next[i];
+    const end = runs[endRun].index + runs[endRun][0].length;
+    result += lines.slice(cursor, start) + mask(lines.slice(start, end));
+    cursor = end;
+    i = endRun;
+  }
+  return result + lines.slice(cursor);
+}
+
+/** From extensionless wiki targets only, prefer a sibling note to a folder-note. */
+function resolveWikiTarget(target, pathSet) {
+  if (!target || path.posix.extname(target)) return target;
+  const candidates = [`${target}.md`, `${target}/${path.posix.basename(target)}.md`];
+  return candidates.find((candidate) => pathSet.has(candidate)) ?? target;
+}
+
 /** 从一段 Markdown 里抽引用 */
-function extractLinks(content, fromPath) {
+function extractLinks(content, fromPath, pathSet) {
+  const prose = withoutCode(content);
   const links = [];
   const seen = new Set();
 
@@ -65,13 +124,13 @@ function extractLinks(content, fromPath) {
     links.push({ target, kind, raw, label: label || null });
   };
 
-  for (const match of content.matchAll(WIKI_LINK_RE)) {
+  for (const match of prose.matchAll(WIKI_LINK_RE)) {
     const target = match[1].trim();
-    const normalized = toProjectPath(target, fromPath);
+    const normalized = resolveWikiTarget(toProjectPath(target, fromPath), pathSet);
     push(normalized, "wiki", match[0], (match[3] || match[2] || target).trim());
   }
 
-  for (const match of content.matchAll(MD_LINK_RE)) {
+  for (const match of prose.matchAll(MD_LINK_RE)) {
     const target = match[2].trim();
     const normalized = toProjectPath(target, fromPath);
     push(normalized, "markdown", match[0], (match[1] || '').trim());
@@ -192,7 +251,7 @@ export async function buildLinkIndex(projectRoot, contentRoots = ["."]) {
     if (!titleOwners.has(title)) titleOwners.set(title, []);
     titleOwners.get(title).push(relPath);
 
-    for (const link of extractLinks(content, relPath)) {
+    for (const link of extractLinks(content, relPath, pathSet)) {
       if (!link.target) continue;
       if (!pathSet.has(link.target)) {
         // 目标不存在：记下来，界面上可以提示「悬空链接」
