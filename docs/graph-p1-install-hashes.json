@@ -1,0 +1,78 @@
+[
+  {
+    "file": "dist/index.html",
+    "match": true
+  },
+  {
+    "file": "server/bridge-server.mjs",
+    "match": true
+  },
+  {
+    "file": "server/content-hash.mjs",
+    "match": true
+  },
+  {
+    "file": "server/document-reveal.mjs",
+    "match": true
+  },
+  {
+    "file": "server/link-index.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-asset.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-node-operations.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-profiles.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-reader.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-registry.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-scanner.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-tree-cache.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-tree-entry.mjs",
+    "match": true
+  },
+  {
+    "file": "server/project-writer.mjs",
+    "match": true
+  },
+  {
+    "file": "server/registry-transaction.mjs",
+    "match": true
+  },
+  {
+    "file": "server/service-host-protocol.mjs",
+    "match": true
+  },
+  {
+    "file": "server/service-host.mjs",
+    "match": true
+  },
+  {
+    "file": "server/service-log.mjs",
+    "match": true
+  },
+  {
+    "file": "server/web-ui.mjs",
+    "match": true
+  }
+]

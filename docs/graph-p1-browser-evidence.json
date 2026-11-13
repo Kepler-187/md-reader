@@ -1,0 +1,47 @@
+{
+  "projectId": "library-c6c86f25",
+  "profileId": "default",
+  "all": {
+    "nodes": 124,
+    "edges": 191,
+    "broken": 0
+  },
+  "navigationNodes": 9,
+  "visibleNavigation": {
+    "nodes": 118,
+    "edges": 191,
+    "includeIsolated": false
+  },
+  "hiddenNavigation": {
+    "nodes": 23,
+    "edges": 30,
+    "includeIsolated": false
+  },
+  "hiddenNavigationWithIsolated": {
+    "nodes": 115,
+    "edges": 30
+  },
+  "blackwallOutgoing": 11,
+  "prototypeBacklinks": 4,
+  "applicationIndexRequestsBeforeManualAudit": 1,
+  "returnSelected": "writing/文字创作/黑墙之下/原型人物.md",
+  "panelPinned": true,
+  "returnTabsBefore": 2,
+  "returnTabsAfter": 2,
+  "enterArticleLocked": true,
+  "emptySelected": "templates/writing.md",
+  "shortViewport": {
+    "width": 1024,
+    "height": 650,
+    "outlineHeight": 98,
+    "relationsHeight": 98
+  },
+  "drag": {
+    "id": "INDEX.md",
+    "directNeighbors": 60,
+    "movedNeighbors": 60,
+    "trustedMoves": 9,
+    "releaseContinued": true,
+    "selected": "writing/文字创作/黑墙之下/原型人物.md"
+  }
+}
