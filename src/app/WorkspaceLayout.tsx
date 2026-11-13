@@ -191,6 +191,8 @@ interface WorkspaceLayoutProps {
   graphError?: string | null
   onCloseGraph?: () => void
   onRefreshGraph?: () => void
+  graphProjectId?: string | null
+  onGraphEnterDocument?: (path: string) => void
 }
 
 export interface WorkspaceActionToast {
@@ -1700,6 +1702,8 @@ export function WorkspaceLayout({
   graphError = null,
   onCloseGraph,
   onRefreshGraph,
+  graphProjectId = null,
+  onGraphEnterDocument,
 }: WorkspaceLayoutProps) {
   const documentTitle = currentDocumentPath?.split('/').at(-1) ?? null
   const activeDocumentContent =
@@ -2516,9 +2520,10 @@ export function WorkspaceLayout({
                 loading={graphLoading}
                 error={graphError}
                 currentDocumentPath={currentDocumentPath}
-                onDocumentSelect={onDocumentSelect}
-                onClose={() => onCloseGraph?.()}
-                onRefresh={() => onRefreshGraph?.()}
+                projectId={graphProjectId}
+                onCloseGraph={() => onCloseGraph?.()}
+                onRefreshGraph={() => onRefreshGraph?.()}
+                onEnterDocument={(path) => onGraphEnterDocument?.(path)}
               />
             ) : currentDocumentPath ? (
               <div className="workspace__document">

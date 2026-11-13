@@ -15,7 +15,18 @@ import * as forceSimulationModule from './forceSimulation.js'
 import * as forceGeometryModule from './forceGeometry.js'
 
 const { createForceSimulation, initialForcePositions } = forceSimulationModule as any
-const { forceNodeProfiles } = forceGeometryModule as any
+const {
+  forceNodeProfiles,
+  forceNodeRadii,
+  forceEdgeGeometry,
+  forceEdgeRibbon,
+  forceRoutePoint,
+  forceRouteSamples,
+  forceGraphRoutes,
+  FORCE_NODE_SIZE,
+  FORCE_PARALLEL_SPACING,
+  FORCE_DEFAULT_RADIUS,
+} = forceGeometryModule as any
 
 export interface GraphNodeInput {
   id: string
@@ -147,4 +158,144 @@ export function layoutGraph(nodes: GraphNodeInput[], edges: GraphEdgeInput[]): G
     edges: graph.edges.map((e) => ({ source: e.source, target: e.target })),
     bounds: { minX, minY, maxX, maxY },
   }
+}
+
+
+/** 活体布局句柄：保留仿真引擎，供拖动与实时重绘使用 */
+export interface LiveForceLayout {
+  /** 当前坐标（锚定框左上角），每帧由 onTick 更新 */
+  positions: Record<string, Point>
+  /** 拖动一个节点（或一组）开始 */
+  dragStart: (ids: string[]) => void
+  /** 拖动中：把节点钉在指定坐标 */
+  drag: (ids: string[], next: Record<string, Point>) => void
+  /** 松手：撤掉固定点，周围的邻居顺势回弹 */
+  dragEnd: () => void
+  /** 停止仿真并释放 */
+  stop: () => void
+  /** 仿真是否已收敛 */
+  isSettled: () => boolean
+}
+
+/**
+ * 建一个活体力导向布局。
+ *
+ * 与 layoutGraph 的区别：layoutGraph 同步跑到收敛后丢弃引擎，适合"进来就画完"；
+ * 这个保留引擎并跑 rAF，拖动时节点能实时跟随、邻居弹性回弹——mechanics 原实现的
+ * 手感就来自这里（dragStart 里把连通分量升温、dragEnd 让 alpha 自然冷却）。
+ */
+export function createLiveForceLayout(
+  nodes: GraphNodeInput[],
+  edges: GraphEdgeInput[],
+  options: {
+    /** 复用上一次的坐标，避免重新随机播种 */
+    positions?: Record<string, Point> | null
+    fixedNodeIds?: string[]
+    onTick: (positions: Record<string, Point>) => void
+    onSettle: (positions: Record<string, Point>) => void
+    onError?: (error: Error) => void
+  },
+): LiveForceLayout {
+  const graph = toReadGraph(nodes, edges)
+  const seed = options.positions && Object.keys(options.positions).length ? options.positions : initialForcePositions(graph)
+
+  let settled = false
+  let disposed = false
+
+  // mechanics 默认用 requestAnimationFrame 排帧，而浏览器在后台标签页会暂停 rAF：
+  // 那时拖动和冷却都推不动，画面停在旧帧。这里换成 setTimeout 兜底——
+  // 前台依旧是每帧一次的节奏，后台也能继续推进。
+  const scheduleFrame = (callback: () => void): number =>
+    (globalThis.setTimeout(callback, 16) as unknown) as number
+  const cancelScheduledFrame = (id: number): void => globalThis.clearTimeout(id)
+
+  const sim = createForceSimulation({
+    requestFrame: scheduleFrame,
+    cancelFrame: cancelScheduledFrame,
+    onTick: (payload: any) => {
+      if (disposed) return
+      options.onTick(payload?.positions ?? {})
+    },
+    onSettle: (payload: any) => {
+      if (disposed) return
+      settled = true
+      options.onSettle(payload?.positions ?? {})
+    },
+    onError: (error: Error) => {
+      if (disposed) return
+      options.onError?.(error)
+    },
+  })
+
+  sim.start({
+    graph,
+    positions: seed,
+    fixedNodeIds: (options.fixedNodeIds ?? []).filter((id) => graph.nodes.some((node) => node.id === id)),
+  })
+
+  return {
+    get positions() {
+      return sim.getPositions()
+    },
+    dragStart: (ids) => {
+      if (disposed) return
+      settled = false
+      sim.dragStart(ids)
+    },
+    drag: (ids, next) => {
+      if (disposed) return
+      sim.drag(ids, next)
+    },
+    dragEnd: () => {
+      if (disposed) return
+      sim.dragEnd()
+    },
+    stop: () => {
+      disposed = true
+      sim.stop()
+    },
+    isSettled: () => settled,
+  }
+}
+
+/** 从给定坐标算包围盒，供相机适配使用 */
+export function measurePositions(
+  nodes: GraphNodeInput[],
+  edges: GraphEdgeInput[],
+  positions: Record<string, Point>,
+): GraphLayoutResult['bounds'] {
+  const graph = toReadGraph(nodes, edges)
+  const profiles = forceNodeProfiles(graph) as Map<string, { radius: number }>
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const node of nodes) {
+    const point = positions[node.id]
+    if (!point) continue
+    const radius = profiles.get(node.id)?.radius ?? 10
+    minX = Math.min(minX, point.x - radius)
+    minY = Math.min(minY, point.y - radius)
+    maxX = Math.max(maxX, point.x + radius)
+    maxY = Math.max(maxY, point.y + radius)
+  }
+  if (!Number.isFinite(minX)) return { minX: 0, minY: 0, maxX: 0, maxY: 0 }
+  return { minX, minY, maxX, maxY }
+}
+
+/* ---------------------------------------------------------------- 几何工具
+ * 渲染层需要的几何与配色：直接复用 mechanics 的实现，不另写一套。
+ * 这些不是"近似替代"，是同一个函数。
+ */
+export {
+  forceEdgeGeometry,
+  forceEdgeRibbon,
+  forceRoutePoint,
+  forceRouteSamples,
+  forceGraphRoutes,
+  forceNodeProfiles,
+  forceNodeRadii,
+  FORCE_NODE_SIZE,
+  FORCE_PARALLEL_SPACING,
+  FORCE_DEFAULT_RADIUS,
 }

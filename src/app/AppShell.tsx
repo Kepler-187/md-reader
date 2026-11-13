@@ -89,6 +89,8 @@ interface AppShellProps {
   onToggleGraph?: () => void
   onCloseGraph?: () => void
   onRefreshGraph?: () => void
+  graphProjectId?: string | null
+  onGraphEnterDocument?: (path: string) => void
   onDocumentSelect: (path: string) => void
   onDocumentScrollTopChange?: (documentPath: string, scrollTop: number) => void
   onCreateDocument?: (directoryPath?: string) => void | Promise<void>
@@ -225,6 +227,8 @@ export function AppShell(props: AppShellProps) {
         graphError={props.graphError}
         onCloseGraph={props.onCloseGraph}
         onRefreshGraph={props.onRefreshGraph}
+        graphProjectId={props.graphProjectId}
+        onGraphEnterDocument={props.onGraphEnterDocument}
         onDocumentSelect={props.onDocumentSelect}
         onDocumentScrollTopChange={props.onDocumentScrollTopChange}
         onCreateDocument={props.onCreateDocument}

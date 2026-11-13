@@ -3017,33 +3017,6 @@ select {
   cursor: grabbing;
 }
 
-.graph-view__svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.graph-view__edge {
-  stroke: var(--border-strong, #c9c9c4);
-  stroke-width: 1;
-  opacity: 0.75;
-}
-
-.graph-view__node {
-  cursor: pointer;
-}
-
-.graph-view__node circle {
-  transition: opacity 120ms ease;
-}
-
-.graph-view__label {
-  font-size: 11px;
-  fill: var(--text-secondary, #6b6b66);
-  pointer-events: none;
-  user-select: none;
-}
-
 .graph-view__empty {
   position: absolute;
   inset: 0;
@@ -3062,24 +3035,111 @@ select {
   color: var(--error-fg, #cf4a4a);
 }
 
-.graph-view__tooltip {
+/* Canvas 层：铺满容器，交互由容器统一接管 */
+.graph-view__canvas-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* 信息面板：悬停时跟随，点击后固定在同一位置 */
+.graph-view__panel {
   position: absolute;
   left: 16px;
   bottom: 16px;
+  width: min(320px, calc(100% - 32px));
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 10px 14px;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--panel-bg, #f7f7f5);
   border: 1px solid var(--border-default, #e4e4e0);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 10%);
   font-size: 12px;
   color: var(--text-secondary, #6b6b66);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
-  pointer-events: none;
 }
 
-.graph-view__tooltip strong {
-  color: var(--text-primary, #1a1a1a);
+.graph-view__panel[data-pinned] {
+  border-color: var(--status-bar-accent, #2f6b57);
+  box-shadow: 0 8px 24px rgb(47 107 87 / 16%);
+}
+
+.graph-view__panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.graph-view__panel-head strong {
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
+  color: var(--text-primary, #1a1a1a);
+  overflow-wrap: anywhere;
+}
+
+.graph-view__panel-badge {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  line-height: 16px;
+  background: var(--surface-elevated, #efefec);
+  color: var(--text-secondary, #6b6b66);
+}
+
+.graph-view__panel[data-pinned] .graph-view__panel-badge {
+  background: var(--status-bar-accent, #2f6b57);
+  color: #fff;
+}
+
+.graph-view__panel-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.graph-view__panel-meta > div {
+  display: flex;
+  gap: 8px;
+}
+
+.graph-view__panel-meta dt {
+  flex: none;
+  width: 48px;
+  color: var(--text-tertiary, #8b8b85);
+}
+
+.graph-view__panel-meta dd {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graph-view__panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graph-view__enter {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font: inherit;
+  font-weight: 500;
+  background: var(--text-primary, #1a1a1a);
+  color: var(--panel-bg, #fff);
+  cursor: pointer;
+}
+
+.graph-view__enter:disabled {
+  opacity: 0.45;
+  cursor: default;
 }

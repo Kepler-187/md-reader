@@ -2659,8 +2659,18 @@ function App() {
   }
 
   /** 图谱里点节点：打开那篇文档，并退回文档视图 */
-  function handleGraphDocumentSelect(path: string) {
+  /**
+   * 图谱里点「进入文章」：退出图谱、打开该文档，并确保停在阅读态。
+   * 「进入文章」在用户语义里是读书而不是改稿，所以强制 locked；
+   * 如果当前是分栏模式，也切回常规，否则右侧预览抢焦点。
+   */
+  function handleGraphEnterDocument(path: string) {
     setGraphOpen(false)
+    setSession((current) => ({
+      ...current,
+      mode: 'regular',
+      regularViewState: 'locked',
+    }))
     void handleDocumentSelect(path)
   }
 
@@ -3241,7 +3251,9 @@ function App() {
         onToggleGraph={handleToggleGraph}
         onCloseGraph={() => setGraphOpen(false)}
         onRefreshGraph={() => void loadGraphIndex()}
-        onDocumentSelect={graphOpen ? handleGraphDocumentSelect : handleDocumentSelect}
+        graphProjectId={activeProjectId}
+        onGraphEnterDocument={handleGraphEnterDocument}
+        onDocumentSelect={handleDocumentSelect}
         onDocumentScrollTopChange={handleDocumentScrollTopChange}
         onCreateDocument={handleCreateDocument}
         onCreateDirectory={handleCreateDirectory}
