@@ -23,6 +23,7 @@ import {
   renameDocumentNode,
 } from "./project-node-operations.mjs";
 import { readMarkdownDocument } from "./project-reader.mjs";
+import { buildLinkIndex } from "./link-index.mjs";
 import { revealMarkdownDocumentInExplorer } from './document-reveal.mjs';
 import { DocumentConflictError, writeMarkdownDocument } from "./project-writer.mjs";
 import { createProjectTreeCache } from "./project-tree-cache.mjs";
@@ -243,6 +244,19 @@ async function handleRequest(request, response, { runtimeHome, port, stateFile, 
       return;
     }
     sendJson(response, 404, { error: "Unknown or expired refreshId" });
+    return;
+  }
+
+  const linkIndexMatch = url.pathname.match(/^\/api\/projects\/([^/]+)\/link-index$/);
+  if (request.method === "GET" && linkIndexMatch) {
+    const profileId = url.searchParams.get("profileId") ?? "default";
+    const projectId = decodeURIComponent(linkIndexMatch[1]);
+    const project = await getProjectById(runtimeHome, profileId, projectId);
+    if (!project) {
+      sendJson(response, 404, { error: `Unknown project: ${projectId}` });
+      return;
+    }
+    sendJson(response, 200, await buildLinkIndex(project.rootPath, project.contentRoots));
     return;
   }
 
