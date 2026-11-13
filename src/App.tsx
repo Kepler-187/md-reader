@@ -2684,7 +2684,7 @@ function App() {
 
   function handleReturnToGraph() {
     if (!activeProjectId || !currentDocumentPath) return
-    const includeNavigation = isNavigationNode(currentDocumentPath) || (readGraphViewState(activeProjectId)?.includeNavigation ?? false)
+    const includeNavigation = isNavigationNode(currentDocumentPath) || (readGraphViewState(activeProjectId)?.includeNavigation ?? true)
     const connected = graphIndex?.edges.some(edge =>
       (edge.source === currentDocumentPath || edge.target === currentDocumentPath)
       && (includeNavigation || (!isNavigationNode(edge.source) && !isNavigationNode(edge.target))))

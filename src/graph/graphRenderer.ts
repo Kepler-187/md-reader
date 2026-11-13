@@ -21,7 +21,7 @@ import {
   forceRoutePoint,
 } from './forceAdapter'
 import { FORCE_EDGE_REST, FORCE_RELATION_COLORS, forceNodePalette, hexAlpha } from './graphPalette'
-import type { LaidOutNode } from './linkGraphAdapter'
+import { isNavigationNode, type LaidOutNode } from './linkGraphAdapter'
 
 const NODE_SIZE = FORCE_NODE_SIZE as { width: number; height: number }
 const WIDTH = NODE_SIZE.width
@@ -47,6 +47,8 @@ export interface GraphFocusState {
 
 interface VisibleNode {
   id: string
+  label: string
+  navigation: boolean
   cx: number
   cy: number
   radius: number
@@ -133,19 +135,6 @@ let routeCache = new Map<string, EdgeRouteCache>()
 /** 数据变了要清缓存，否则会拿旧坐标的连线 */
 export function resetGraphRenderCache(): void {
   routeCache = new Map()
-  labelSource.clear()
-}
-
-/* ------------------------------------------------------------------ 标签 */
-
-const labelSource = new Map<string, string>()
-
-export function setGraphLabels(nodes: LaidOutNode[]): void {
-  labelSource.clear()
-  for (const node of nodes) {
-    const text = node.title || node.id
-    labelSource.set(node.id, text.length > 22 ? `${text.slice(0, 21)}…` : text)
-  }
 }
 
 /* ------------------------------------------------------------------ 渲染 */
@@ -165,6 +154,8 @@ export interface GraphRenderInput {
   /** 高亮层数：显示选中节点 N 跳以内的关系 */
   highlightDepth?: number
   reduceMotion?: boolean
+  /** 默认只显示文件名；勾选后显示项目内完整路径。 */
+  showFullPath?: boolean
   now?: number
 }
 
@@ -384,6 +375,8 @@ export function drawGraph(context: CanvasRenderingContext2D, input: GraphRenderI
     if (tier === 'core') halos.push({ cx, cy, radius, color: palette.halo, alpha: alpha * 0.3 })
     visibleNodes.push({
       id: node.id,
+      label: input.showFullPath ? node.id : node.id.replaceAll('\\', '/').split('/').at(-1) || node.id,
+      navigation: isNavigationNode(node.id),
       cx,
       cy,
       radius,
@@ -528,12 +521,14 @@ function drawLabels(
   }
   const priority = (item: VisibleNode) =>
     (item.focus || item.hovered ? 1e6 : 0) +
+    (item.navigation ? 5e5 : 0) +
     (attention && related.has(item.id) ? 1e5 : 0) +
     ({ core: 2e4, secondary: 1e4, normal: 0 }[item.tier] ?? 0)
 
   const shown = visibleNodes
     .filter(
       (item) =>
+        item.navigation ||
         item.focus ||
         item.hovered ||
         (attention && related.has(item.id)) ||
@@ -549,7 +544,9 @@ function drawLabels(
 
   let drawn = 0
   for (const item of shown) {
-    if (drawn >= 400) break
+    // 导航名称始终可读，不受缩放、聚焦、避让或普通标签数量上限隐藏。
+    const forced = item.navigation || item.focus || item.hovered
+    if (drawn >= 400 && !forced) continue
     const style =
       item.tier === 'core'
         ? { weight: 700, size: small ? 13 : 15, color: '#18221d' }
@@ -557,7 +554,7 @@ function drawLabels(
           ? { weight: 600, size: small ? 11.5 : 12.5, color: '#2b3631' }
           : { weight: item.focus ? 600 : 500, size: small ? 10.5 : 11.5, color: '#56625c' }
     context.font = `${style.weight} ${style.size}px ${font}`
-    const label = labelSource.get(item.id) ?? item.id
+    const label = item.label
     if (!label) continue
     const widthKey = `${context.font}|${label}`
     let width = labelWidthCache.get(widthKey)
@@ -569,7 +566,6 @@ function drawLabels(
     const sx = item.cx * scale + cameraX
     const top = (item.cy + item.radius) * scale + cameraY + 3
     const box = [sx - width / 2 - 2, top - 1, sx + width / 2 + 2, top + style.size + 2]
-    const forced = item.focus || item.hovered
     if (!forced && collides(box)) continue
     occupy(box)
     context.globalAlpha = 1

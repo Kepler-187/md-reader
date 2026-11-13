@@ -23,6 +23,7 @@ export interface GraphPoint {
 export interface GraphViewState {
   includeNavigation?: boolean
   includeIsolated?: boolean
+  showFullPath?: boolean
   /** 节点坐标（锚定框左上角，与 forceGeometry 的约定一致） */
   positions: Record<string, GraphPoint>
   camera: GraphCamera | null
@@ -48,8 +49,9 @@ export function readGraphViewState(projectId: string): GraphViewState | null {
 export function writeGraphViewState(projectId: string, patch: Partial<GraphViewState>): void {
   const prev = store.get(projectId)
   store.set(projectId, {
-    includeNavigation: patch.includeNavigation ?? prev?.includeNavigation ?? false,
+    includeNavigation: patch.includeNavigation ?? prev?.includeNavigation ?? true,
     includeIsolated: patch.includeIsolated ?? prev?.includeIsolated ?? false,
+    showFullPath: patch.showFullPath ?? prev?.showFullPath ?? false,
     positions: patch.positions ?? prev?.positions ?? {},
     camera: patch.camera !== undefined ? patch.camera : (prev?.camera ?? null),
     selectedId: patch.selectedId !== undefined ? patch.selectedId : (prev?.selectedId ?? null),

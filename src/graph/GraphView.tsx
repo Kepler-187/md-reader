@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { LinkIndexPayload } from '../workspace/local-bridge-access'
 import { createLiveForceLayout, measurePositions, type LiveForceLayout } from './forceAdapter'
-import { drawGraph, hitTest, resetGraphRenderCache, setGraphLabels, type GraphCamera } from './graphRenderer'
+import { drawGraph, hitTest, resetGraphRenderCache, type GraphCamera } from './graphRenderer'
 import { graphTopologyKey, readGraphViewState, reconcileGraphViewState, writeGraphViewState } from './graphViewStore'
 import { buildGraphView, type LaidOutNode } from './linkGraphAdapter'
 
@@ -54,6 +54,8 @@ export function GraphView({
   const [hops, setHops] = useState(1)
   const [includeIsolated, setIncludeIsolated] = useState(() => projectId ? readGraphViewState(projectId)?.includeIsolated ?? false : false)
   const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? true : true)
+  const [showFullPath, setShowFullPath] = useState(() => projectId ? readGraphViewState(projectId)?.showFullPath ?? false : false)
+  const showFullPathRef = useRef(showFullPath)
 
   /** 固定选中的节点：点击后保留，鼠标移开不消失 */
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -162,6 +164,7 @@ export function GraphView({
       hoveredId: hoveredRef.current,
       highlightDepth: 1,
       reduceMotion: reduceMotionRef.current,
+      showFullPath: showFullPathRef.current,
     })
   }, [nodes, edges])
 
@@ -179,6 +182,12 @@ export function GraphView({
       paint()
     }, 16)
   }, [paint])
+
+  // 文字选项只触发重绘，仿真中的回调也读取最新值，不重建布局或相机。
+  useEffect(() => {
+    showFullPathRef.current = showFullPath
+    schedulePaint()
+  }, [showFullPath, schedulePaint])
 
   /* -------------------------------------------------- 布局与状态恢复 */
 
@@ -208,7 +217,6 @@ export function GraphView({
         ? stored.positions
         : null
 
-    setGraphLabels(nodes)
     resetGraphRenderCache()
 
     /** 与 mechanics startForceDrag 一致：复用坐标，不固定节点。
@@ -563,6 +571,13 @@ export function GraphView({
             if (projectId) writeGraphViewState(projectId, { includeNavigation: !event.target.checked })
           }} />
           过滤导航节点
+        </label>
+        <label className="graph-view__check">
+          <input type="checkbox" checked={showFullPath} onChange={event => {
+            setShowFullPath(event.target.checked)
+            if (projectId) writeGraphViewState(projectId, { showFullPath: event.target.checked })
+          }} />
+          显示完整路径
         </label>
         <div className="graph-view__group graph-view__group--right">
           <span className="graph-view__meta">

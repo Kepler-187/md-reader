@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { GraphView } from '../../src/graph/GraphView'
-import { computeFocus } from '../../src/graph/graphRenderer'
+import { computeFocus, drawGraph } from '../../src/graph/graphRenderer'
 import { clearGraphViewState, graphTopologyKey, readGraphViewState, writeGraphViewState } from '../../src/graph/graphViewStore'
 
 vi.mock('../../src/graph/graphRenderer', async (original) => ({
@@ -31,6 +31,26 @@ it('shows navigation on first open and restores an explicit filter change from t
   expect(screen.getByRole('checkbox', { name: '过滤导航节点' })).toBeChecked()
   fireEvent.click(screen.getByRole('checkbox', { name: '过滤导航节点' }))
   expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(true)
+})
+
+it('toggles full paths without changing layout, camera or selection and restores the choice', () => {
+  const first = render(<GraphView {...props} />)
+  advance(100)
+  expect(screen.getByRole('checkbox', { name: '显示完整路径' })).not.toBeChecked()
+  expect(vi.mocked(drawGraph).mock.lastCall?.[1].showFullPath).toBe(false)
+  fireEvent.click(screen.getByRole('checkbox', { name: '显示完整路径' }))
+  advance(100)
+  expect(vi.mocked(drawGraph).mock.lastCall?.[1].showFullPath).toBe(true)
+  expect(debug()).toMatchObject({ positions, camera, selectedId: 'b.md', hasEngine: false })
+  expect(readGraphViewState(props.projectId)).toMatchObject({ showFullPath: true, includeNavigation: true })
+  first.unmount()
+  render(<GraphView {...props} />)
+  advance(100)
+  expect(screen.getByRole('checkbox', { name: '显示完整路径' })).toBeChecked()
+  fireEvent.click(screen.getByRole('checkbox', { name: '显示完整路径' }))
+  advance(100)
+  expect(vi.mocked(drawGraph).mock.lastCall?.[1].showFullPath).toBe(false)
+  expect(debug()).toMatchObject({ positions, camera, selectedId: 'b.md', hasEngine: false })
 })
 
 beforeEach(() => {
