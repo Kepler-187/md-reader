@@ -103,9 +103,26 @@ function withoutCode(content) {
   return result + lines.slice(cursor);
 }
 
-/** From extensionless wiki targets only, prefer a sibling note to a folder-note. */
+/**
+ * 常见附件扩展名。带这些后缀的 wiki 目标视为「文件引用」，不补 .md。
+ * 不能用 path.extname 一刀切：「新版更新视频脚本 2.0」「J.K.罗琳…」这类文章名里带点，
+ * extname 会误报，导致该补的 .md 没补。
+ */
+const ATTACHMENT_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.avif', '.ico',
+  '.mp4', '.mov', '.webm', '.mp3', '.wav',
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+  '.zip', '.txt', '.csv', '.json', '.md', '.mdx',
+]);
+
+/**
+ * 只在目标无真正扩展名时，依次尝试 .md 与 folder-note 形式。
+ * 已是 .md/.mdx，或是已知附件类型，都原样返回。
+ */
 function resolveWikiTarget(target, pathSet) {
-  if (!target || path.posix.extname(target)) return target;
+  if (!target) return target;
+  const ext = path.posix.extname(target).toLowerCase();
+  if (ATTACHMENT_EXTENSIONS.has(ext)) return target;
   const candidates = [`${target}.md`, `${target}/${path.posix.basename(target)}.md`];
   return candidates.find((candidate) => pathSet.has(candidate)) ?? target;
 }
