@@ -1,0 +1,159 @@
+{
+  "before": {
+    "nodes": 124,
+    "edges": 191,
+    "broken": 0
+  },
+  "after": {
+    "nodes": 125,
+    "edges": 156,
+    "broken": 0
+  },
+  "defaultGraph": {
+    "nodes": 23,
+    "edges": 30
+  },
+  "withNavigation": {
+    "nodes": 121,
+    "edges": 156
+  },
+  "withIsolated": {
+    "nodes": 115,
+    "edges": 30
+  },
+  "indexTargets": [
+    "writing/_MOC/33号远征队联动：从想法到提案.md",
+    "writing/_MOC/黑墙之下：从世界观到玩法.md",
+    "writing/_MOC/美国社会研究：为黑墙之下准备的真实素材.md",
+    "writing/_MOC/霓虹2 剧作线：从主线到系统叙事.md",
+    "writing/_MOC/霓虹2 运营与发行.md",
+    "writing/_MOC/视频脚本与素材制作.md",
+    "writing/_MOC/未分类：还没归类的内容.md",
+    "writing/_MOC/写作方法论：三份笔记加一份原始清单.md",
+    "work/INDEX.md"
+  ],
+  "coverage": {
+    "total": 67,
+    "covered": 67,
+    "uncovered": []
+  },
+  "sameContentEdges": true,
+  "workFunctionUnchanged": true,
+  "workIndexUnchangedExceptTimestamp": true,
+  "installation": [
+    {
+      "file": "vendor/server/bridge-server.mjs",
+      "author": "713644526d2ea3bcf1830e9a81ec78128ed328a84057431eb1e9d27539b883d1",
+      "installed": "713644526d2ea3bcf1830e9a81ec78128ed328a84057431eb1e9d27539b883d1",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/content-hash.mjs",
+      "author": "f87d497c141066e4e66f90a8bdd4b4eb8a8e476616a2840a1e395d0e1256ffae",
+      "installed": "f87d497c141066e4e66f90a8bdd4b4eb8a8e476616a2840a1e395d0e1256ffae",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/document-reveal.mjs",
+      "author": "dc4b772b8b6cbe5a3088c339c8dd918597e6034b05183d265b87316884da8505",
+      "installed": "dc4b772b8b6cbe5a3088c339c8dd918597e6034b05183d265b87316884da8505",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/link-index.mjs",
+      "author": "55b42d9ca8f095fb30589617a6c7719c793216cd7cf7927465f917e34463787d",
+      "installed": "55b42d9ca8f095fb30589617a6c7719c793216cd7cf7927465f917e34463787d",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-asset.mjs",
+      "author": "c2b4571812c0a6fe23a7812be99bb6ddb324500f00d627c3a9353736fc57302c",
+      "installed": "c2b4571812c0a6fe23a7812be99bb6ddb324500f00d627c3a9353736fc57302c",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-node-operations.mjs",
+      "author": "83bdb6607e33e40889f6f4a63f0f60617525e717a41ef0032118f34e1b2e52de",
+      "installed": "83bdb6607e33e40889f6f4a63f0f60617525e717a41ef0032118f34e1b2e52de",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-profiles.mjs",
+      "author": "af4a06448a08366b9bab2a070864362f224ebdd5de231a27fb5bc088bb39cb83",
+      "installed": "af4a06448a08366b9bab2a070864362f224ebdd5de231a27fb5bc088bb39cb83",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-reader.mjs",
+      "author": "eb47efff82bc167823542b2627b39cbb24215a965183eef88e7b1ba9edd92a1e",
+      "installed": "eb47efff82bc167823542b2627b39cbb24215a965183eef88e7b1ba9edd92a1e",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-registry.mjs",
+      "author": "2f11a949a384891855ed090fc3f7a8f951102dcf44026711c8e7f02e295d4023",
+      "installed": "2f11a949a384891855ed090fc3f7a8f951102dcf44026711c8e7f02e295d4023",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-scanner.mjs",
+      "author": "8e0a0eb5388ad7406a191a8731b6e677f68c4a972ed2a986170ed68a181fb66c",
+      "installed": "8e0a0eb5388ad7406a191a8731b6e677f68c4a972ed2a986170ed68a181fb66c",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-tree-cache.mjs",
+      "author": "795fc486061ddc6e5f0cb2b9c1d30d7d811ce39ac08616f09b52a200b0c3886a",
+      "installed": "795fc486061ddc6e5f0cb2b9c1d30d7d811ce39ac08616f09b52a200b0c3886a",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-tree-entry.mjs",
+      "author": "9be152372d997cd671c8d698854b8fcd2971f4936bb8c52133fac56441c0ec8b",
+      "installed": "9be152372d997cd671c8d698854b8fcd2971f4936bb8c52133fac56441c0ec8b",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/project-writer.mjs",
+      "author": "01ba8efe06cf8f3ab7c22b8211a6cfe539699723af0a2a643c7a7e3fd4ba0148",
+      "installed": "01ba8efe06cf8f3ab7c22b8211a6cfe539699723af0a2a643c7a7e3fd4ba0148",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/registry-transaction.mjs",
+      "author": "83f3bab9228fb8d5f0a21542bf1cfb21100df520329683376111fc5b82dc413c",
+      "installed": "83f3bab9228fb8d5f0a21542bf1cfb21100df520329683376111fc5b82dc413c",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/service-host-protocol.mjs",
+      "author": "0645b02b792c2dfbf5e15946335a9b17f83f51a7aed4a75507099d2b7ed20de8",
+      "installed": "0645b02b792c2dfbf5e15946335a9b17f83f51a7aed4a75507099d2b7ed20de8",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/service-host.mjs",
+      "author": "9e5b712326b580d60c7126433b9458f732933bbc04437d7b89878ac6aa7b8f55",
+      "installed": "9e5b712326b580d60c7126433b9458f732933bbc04437d7b89878ac6aa7b8f55",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/service-log.mjs",
+      "author": "e0c92d0684395f18f5cde051848f3e0c097a744b766910cfe35d13d587a904a7",
+      "installed": "e0c92d0684395f18f5cde051848f3e0c097a744b766910cfe35d13d587a904a7",
+      "equal": true
+    },
+    {
+      "file": "vendor/server/web-ui.mjs",
+      "author": "08155f2eb59a97ab31b959cd7ab0a44251d51b12c6434a97ed9c2c0fb64e4d62",
+      "installed": "08155f2eb59a97ab31b959cd7ab0a44251d51b12c6434a97ed9c2c0fb64e4d62",
+      "equal": true
+    },
+    {
+      "file": "vendor/dist/index.html",
+      "author": "66731f0ad750f064178b758dfd8fce209df059972e66c8f714964e164735f3d8",
+      "installed": "66731f0ad750f064178b758dfd8fce209df059972e66c8f714964e164735f3d8",
+      "equal": true
+    }
+  ]
+}
