@@ -43,3 +43,5 @@
 - [0041-md-reader-document-link-and-deep-link-first-release-contract.md](0041-md-reader-document-link-and-deep-link-first-release-contract.md): 确认首版文档内链接与深链使用 `project`、`profile`、`path` 查询参数与 heading ID fragment；只读预览的无修饰左键走应用内保存导航，修饰点击使用规范分享 URL，且不改变文件树切换、编辑器链接、旧裸 `.md` 路由或改名移动引用。
 
 - [0042-md-reader-tab-capacity-pinning-safe-eviction.md](0042-md-reader-tab-capacity-pinning-safe-eviction.md)：确认按项目和 Profile 设置未固定标签上限，以会话固定状态与打开顺序执行安全淘汰。
+- [0040-md-reader-graph-as-center-mode-not-tab.md](0040-md-reader-graph-as-center-mode-not-tab.md): 确认关系图谱用顶栏模式切换占用中间文档区，不做成标签页；标签页模型依赖「一个标签一个文件路径」，图谱用途是跳转而非停留，改标签页模型比加模式切换贵一个量级。
+- [0041-md-reader-reuse-veewo-mechanics-force-layout.md](0041-md-reader-reuse-veewo-mechanics-force-layout.md): 确认力导向布局复用 `@veewo/mechanics` 的 force-simulation / force-geometry / read-graph-integrity 三份纯计算实现，只改 import 路径不改逻辑；参数是真实画布调过的，自研调参成本高；同步跑完不暴露中间态，TS 侧走 allowJs + 调用处 any 不维护 d.ts。
