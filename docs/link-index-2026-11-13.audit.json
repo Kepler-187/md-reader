@@ -1,0 +1,293 @@
+{
+  "scannedAt": "2026-11-13T12:34:10.195Z",
+  "documents": 120,
+  "edges": 102,
+  "bySource": {
+    "INDEX.md": 58,
+    "work/INDEX.md": 44
+  },
+  "broken": 19,
+  "brokenWiki": 18,
+  "writingFiles": 71,
+  "writingWiki": [
+    {
+      "path": "writing/工作文件/33号远征队联动提案/33号远征队联动提案.md",
+      "count": 1,
+      "links": [
+        {
+          "raw": "[[Neon Abyss 2 & Expedition 33 Crossover Proposal|Neon Abyss 2 & Expedition 33 Crossover Proposal]]",
+          "line": 74
+        }
+      ]
+    },
+    {
+      "path": "writing/工作文件/霓虹2 图鉴系统/霓虹2 图鉴系统.md",
+      "count": 1,
+      "links": [
+        {
+          "raw": "[[特洛伊图鉴|特洛伊图鉴]]",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "path": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "count": 11,
+      "links": [
+        {
+          "raw": "[[黑墙之下 小说|黑墙之下 小说]]",
+          "line": 33
+        },
+        {
+          "raw": "[[黑墙之下_正式世界观|黑墙之下_正式世界观]]",
+          "line": 39
+        },
+        {
+          "raw": "[[黑墙之下_人物设定|黑墙之下_人物设定]]",
+          "line": 39
+        },
+        {
+          "raw": "[[黑墙之下_地图区域规划|黑墙之下_地图区域规划]]",
+          "line": 39
+        },
+        {
+          "raw": "[[黑墙之下_游戏设计文档|黑墙之下_游戏设计文档]]",
+          "line": 39
+        },
+        {
+          "raw": "[[黑墙之下_视觉概念图|黑墙之下_视觉概念图]]",
+          "line": 39
+        },
+        {
+          "raw": "[[故事原型&点子/故事原型&点子|故事原型&点子]]",
+          "line": 45
+        },
+        {
+          "raw": "[[原型人物|原型人物]]",
+          "line": 45
+        },
+        {
+          "raw": "[[黑墙之下世界观推演文档|黑墙之下世界观推演文档]]",
+          "line": 45
+        },
+        {
+          "raw": "[[背景故事设定推演|背景故事设定推演]]",
+          "line": 45
+        },
+        {
+          "raw": "[[信仰与人间地狱的对应逻辑|信仰与人间地狱的对应逻辑]]",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "path": "writing/资料收集/美国医疗体系相关资料收集/美国医疗体系相关资料收集.md",
+      "count": 1,
+      "links": [
+        {
+          "raw": "[[详细问答|详细问答]]",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "path": "writing/文字创作/黑墙之下/故事原型&点子/故事原型&点子.md",
+      "count": 1,
+      "links": [
+        {
+          "raw": "[[美国社会区域隔离形成的事实上的种族隔离|美国社会区域隔离形成的事实上的种族隔离]]",
+          "line": 85
+        }
+      ]
+    }
+  ],
+  "codeSamples": [
+    {
+      "path": "README.md",
+      "line": 81,
+      "type": "inlineCode",
+      "links": [
+        {
+          "target": "../小篇/钓鱼.md",
+          "kind": "markdown",
+          "raw": "[标题](../小篇/钓鱼.md)",
+          "label": "标题"
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "line": 82,
+      "type": "inlineCode",
+      "links": [
+        {
+          "target": "黑墙之下_世界观念/",
+          "kind": "wiki",
+          "raw": "[[黑墙之下_世界观念\\|世界观]]",
+          "label": "世界观"
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "line": 84,
+      "type": "inlineCode",
+      "links": [
+        {
+          "target": "...",
+          "kind": "wiki",
+          "raw": "[[...]]",
+          "label": "..."
+        }
+      ]
+    },
+    {
+      "path": "work/daily/2026-11-13-evening.md",
+      "line": 58,
+      "type": "inlineCode",
+      "links": [
+        {
+          "target": "work/daily/1",
+          "kind": "wiki",
+          "raw": "[[1]]",
+          "label": "1"
+        }
+      ]
+    }
+  ],
+  "recoverable": [
+    {
+      "from": "writing/工作文件/33号远征队联动提案/33号远征队联动提案.md",
+      "path": "writing/工作文件/33号远征队联动提案/Neon Abyss 2 & Expedition 33 Crossover Proposal",
+      "raw": "[[Neon Abyss 2 & Expedition 33 Crossover Proposal|Neon Abyss 2 & Expedition 33 Crossover Proposal]]",
+      "kind": "wiki",
+      "resolved": "writing/工作文件/33号远征队联动提案/Neon Abyss 2 & Expedition 33 Crossover Proposal.md"
+    },
+    {
+      "from": "writing/工作文件/霓虹2 图鉴系统/霓虹2 图鉴系统.md",
+      "path": "writing/工作文件/霓虹2 图鉴系统/特洛伊图鉴",
+      "raw": "[[特洛伊图鉴|特洛伊图鉴]]",
+      "kind": "wiki",
+      "resolved": "writing/工作文件/霓虹2 图鉴系统/特洛伊图鉴.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下 小说",
+      "raw": "[[黑墙之下 小说|黑墙之下 小说]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下 小说.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下_正式世界观",
+      "raw": "[[黑墙之下_正式世界观|黑墙之下_正式世界观]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下_正式世界观.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下_人物设定",
+      "raw": "[[黑墙之下_人物设定|黑墙之下_人物设定]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下_人物设定.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下_地图区域规划",
+      "raw": "[[黑墙之下_地图区域规划|黑墙之下_地图区域规划]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下_地图区域规划.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下_游戏设计文档",
+      "raw": "[[黑墙之下_游戏设计文档|黑墙之下_游戏设计文档]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下_游戏设计文档.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下_视觉概念图",
+      "raw": "[[黑墙之下_视觉概念图|黑墙之下_视觉概念图]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下_视觉概念图.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/故事原型&点子/故事原型&点子",
+      "raw": "[[故事原型&点子/故事原型&点子|故事原型&点子]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/故事原型&点子/故事原型&点子.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/原型人物",
+      "raw": "[[原型人物|原型人物]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/原型人物.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/黑墙之下世界观推演文档",
+      "raw": "[[黑墙之下世界观推演文档|黑墙之下世界观推演文档]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/黑墙之下世界观推演文档.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/背景故事设定推演",
+      "raw": "[[背景故事设定推演|背景故事设定推演]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/背景故事设定推演.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "path": "writing/文字创作/黑墙之下/信仰与人间地狱的对应逻辑",
+      "raw": "[[信仰与人间地狱的对应逻辑|信仰与人间地狱的对应逻辑]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/信仰与人间地狱的对应逻辑.md"
+    },
+    {
+      "from": "writing/资料收集/美国医疗体系相关资料收集/美国医疗体系相关资料收集.md",
+      "path": "writing/资料收集/美国医疗体系相关资料收集/详细问答",
+      "raw": "[[详细问答|详细问答]]",
+      "kind": "wiki",
+      "resolved": "writing/资料收集/美国医疗体系相关资料收集/详细问答.md"
+    },
+    {
+      "from": "writing/文字创作/黑墙之下/故事原型&点子/故事原型&点子.md",
+      "path": "writing/文字创作/黑墙之下/故事原型&点子/美国社会区域隔离形成的事实上的种族隔离",
+      "raw": "[[美国社会区域隔离形成的事实上的种族隔离|美国社会区域隔离形成的事实上的种族隔离]]",
+      "kind": "wiki",
+      "resolved": "writing/文字创作/黑墙之下/故事原型&点子/美国社会区域隔离形成的事实上的种族隔离.md"
+    }
+  ],
+  "localMatchesLive": true,
+  "probes": {
+    "inlineWiki": [
+      {
+        "target": "Target",
+        "kind": "wiki",
+        "raw": "[[Target]]",
+        "label": "Target"
+      }
+    ],
+    "fencedWiki": [
+      {
+        "target": "Target",
+        "kind": "wiki",
+        "raw": "[[Target]]",
+        "label": "Target"
+      }
+    ],
+    "encodedMarkdown": [
+      {
+        "target": "My%20Note.md",
+        "kind": "markdown",
+        "raw": "[x](My%20Note.md)",
+        "label": "x"
+      }
+    ],
+    "queryMarkdown": []
+  }
+}
