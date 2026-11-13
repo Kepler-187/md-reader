@@ -18,19 +18,19 @@ const props = { index, projectId: 'drag-regression', loading: false, error: null
 const debug = () => (window as any).__graphDebug
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms))
 
-it('checks navigation filtering on first open and restores an explicit change from the store', () => {
+it('shows navigation on first open and restores an explicit filter change from the store', () => {
   clearGraphViewState(props.projectId)
   const first = render(<GraphView {...props} />)
   const filter = screen.getByRole('checkbox', { name: '过滤导航节点' })
-  expect(filter).toBeChecked()
-  fireEvent.click(filter)
   expect(filter).not.toBeChecked()
-  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(true)
+  fireEvent.click(filter)
+  expect(filter).toBeChecked()
+  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(false)
   first.unmount()
   render(<GraphView {...props} />)
-  expect(screen.getByRole('checkbox', { name: '过滤导航节点' })).not.toBeChecked()
+  expect(screen.getByRole('checkbox', { name: '过滤导航节点' })).toBeChecked()
   fireEvent.click(screen.getByRole('checkbox', { name: '过滤导航节点' }))
-  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(false)
+  expect(readGraphViewState(props.projectId)?.includeNavigation).toBe(true)
 })
 
 beforeEach(() => {

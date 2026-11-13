@@ -53,7 +53,7 @@ export function GraphView({
   const [scope, setScope] = useState<'global' | 'local'>('global')
   const [hops, setHops] = useState(1)
   const [includeIsolated, setIncludeIsolated] = useState(() => projectId ? readGraphViewState(projectId)?.includeIsolated ?? false : false)
-  const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? false : false)
+  const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? true : true)
 
   /** 固定选中的节点：点击后保留，鼠标移开不消失 */
   const [selectedId, setSelectedId] = useState<string | null>(null)
