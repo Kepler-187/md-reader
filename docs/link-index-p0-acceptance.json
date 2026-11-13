@@ -1,0 +1,111 @@
+{
+  "before": {
+    "nodes": 120,
+    "edges": 102,
+    "broken": 17,
+    "backlinks": 102,
+    "prototypeBacklinks": [
+      {
+        "path": "INDEX.md",
+        "title": "库索引",
+        "kind": "markdown",
+        "snippet": "打开"
+      }
+    ]
+  },
+  "after": {
+    "nodes": 120,
+    "edges": 116,
+    "broken": 0,
+    "backlinks": 116,
+    "prototypeBacklinks": [
+      {
+        "path": "INDEX.md",
+        "title": "库索引",
+        "kind": "markdown",
+        "snippet": "打开"
+      },
+      {
+        "path": "writing/文字创作/黑墙之下/黑墙之下.md",
+        "title": "黑墙之下",
+        "kind": "wiki",
+        "snippet": "原型人物"
+      }
+    ]
+  },
+  "lost": [],
+  "added": [
+    {
+      "source": "writing/工作文件/33号远征队联动提案/33号远征队联动提案.md",
+      "target": "writing/工作文件/33号远征队联动提案/Neon Abyss 2 & Expedition 33 Crossover Proposal.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/工作文件/霓虹2 图鉴系统/霓虹2 图鉴系统.md",
+      "target": "writing/工作文件/霓虹2 图鉴系统/特洛伊图鉴.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下 小说.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下_正式世界观.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下_人物设定.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下_地图区域规划.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下_游戏设计文档.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下_视觉概念图.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/故事原型&点子/故事原型&点子.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/原型人物.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/黑墙之下世界观推演文档.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/背景故事设定推演.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/文字创作/黑墙之下/黑墙之下.md",
+      "target": "writing/文字创作/黑墙之下/信仰与人间地狱的对应逻辑.md",
+      "kind": "wiki"
+    },
+    {
+      "source": "writing/资料收集/美国医疗体系相关资料收集/美国医疗体系相关资料收集.md",
+      "target": "writing/资料收集/美国医疗体系相关资料收集/详细问答.md",
+      "kind": "wiki"
+    }
+  ],
+  "addedBacklinksVerified": true,
+  "blackwallOutgoing": 11
+}
