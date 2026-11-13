@@ -1,0 +1,46 @@
+{
+  "shortLabels": [
+    "INDEX.md",
+    "未分类：还没归类的内容.md",
+    "INDEX.md",
+    "黑墙之下：从世界观到玩法.md",
+    "美国社会研究：为黑墙之下准备的真实素材.md",
+    "霓虹2 剧作线：从主线到系统叙事.md",
+    "霓虹2 运营与发行.md",
+    "视频脚本与素材制作.md",
+    "写作方法论：三份笔记加一份原始清单.md",
+    "33号远征队联动：从想法到提案.md",
+    "黑墙之下_地图区域规划.md",
+    "黑墙之下.md"
+  ],
+  "fullLabels": [
+    "work/INDEX.md",
+    "writing/_MOC/未分类：还没归类的内容.md",
+    "INDEX.md",
+    "writing/_MOC/黑墙之下：从世界观到玩法.md",
+    "writing/_MOC/美国社会研究：为黑墙之下准备的真实素材.md",
+    "writing/_MOC/霓虹2 剧作线：从主线到系统叙事.md",
+    "writing/_MOC/霓虹2 运营与发行.md",
+    "writing/_MOC/视频脚本与素材制作.md",
+    "writing/_MOC/写作方法论：三份笔记加一份原始清单.md",
+    "writing/_MOC/33号远征队联动：从想法到提案.md"
+  ],
+  "samePositions": true,
+  "sameCamera": true,
+  "sameSelection": true,
+  "checks": [
+    {
+      "label": "孤立节点",
+      "checked": false
+    },
+    {
+      "label": "过滤导航节点",
+      "checked": false
+    },
+    {
+      "label": "显示完整路径",
+      "checked": true
+    }
+  ],
+  "meta": "121 节点 · 156 连线"
+}
