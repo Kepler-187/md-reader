@@ -107,7 +107,12 @@ interface FetchOptions {
 }
 
 const DEFAULT_BRIDGE_PORT = 8797
-const DEFAULT_BRIDGE_URL = `http://127.0.0.1:${DEFAULT_BRIDGE_PORT}`
+// 页面由 bridge 自己托管（含 dev 模式的 vite middleware），所以同源 origin 就是
+// bridge 地址。写死端口会在宿主把服务放到别的端口时失效（大书库插件就踩过这个坑）。
+const DEFAULT_BRIDGE_URL =
+  typeof window !== 'undefined' && window.location?.origin
+    ? window.location.origin
+    : `http://127.0.0.1:${DEFAULT_BRIDGE_PORT}`
 
 function getFetch(fetchImpl?: typeof fetch): typeof fetch {
   return fetchImpl ?? fetch
