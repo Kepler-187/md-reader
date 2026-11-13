@@ -67,6 +67,7 @@ export function GraphView({
   const ensureEngineRef = useRef<(() => LiveForceLayout) | null>(null)
   /** 本次按下是否已经真正进入拖动（建过引擎） */
   const dragStartedRef = useRef(false)
+  const suppressClickRef = useRef(false)
   const selectedRef = useRef<string | null>(null)
   const hoveredRef = useRef<string | null>(null)
   const frameRef = useRef<number | null>(null)
@@ -77,6 +78,7 @@ export function GraphView({
     startX: number
     startY: number
     originCamera: GraphCamera
+    originPosition: { x: number; y: number } | null
     moved: boolean
     draggingNode: boolean
   } | null>(null)
@@ -207,11 +209,12 @@ export function GraphView({
     setGraphLabels(nodes)
     resetGraphRenderCache()
 
-    /** 建引擎并接到 ref；seed 为空则重新播种，pinAll 用于拖动时固定全图 */
-    const buildEngine = (seed: Record<string, { x: number; y: number }> | null, pinAll: boolean) => {
+    /** 与 mechanics startForceDrag 一致：复用坐标，不固定节点。
+     * dragStart 自己激活所在连通分量；fixedNodeIds 会让邻居跳过弹簧计算。
+     */
+    const buildEngine = (seed: Record<string, { x: number; y: number }> | null) => {
       const engine = createLiveForceLayout(nodes, edges, {
         positions: seed,
-        fixedNodeIds: pinAll ? nodes.map((node) => node.id) : [],
         onTick: (next) => {
           positionsRef.current = { ...next }
           schedulePaint()
@@ -226,7 +229,11 @@ export function GraphView({
       layoutRef.current = engine
       return engine
     }
-    ensureEngineRef.current = () => layoutRef.current ?? buildEngine(positionsRef.current, true)
+    ensureEngineRef.current = () => {
+      // mechanics 每次开始拖动都结束旧仿真，以当前画布坐标开启新会话。
+      layoutRef.current?.stop()
+      return buildEngine(positionsRef.current)
+    }
 
     if (reusable) {
       // 有上次的坐标：直接用，不建引擎。免得冷却几百毫秒把恢复的布局推歪，
@@ -234,7 +241,7 @@ export function GraphView({
       layoutRef.current = null
       positionsRef.current = { ...reusable }
     } else {
-      const engine = buildEngine(null, false)
+      const engine = buildEngine(null)
       positionsRef.current = { ...engine.positions }
     }
 
@@ -299,11 +306,13 @@ export function GraphView({
     }
 
     dragStartedRef.current = false
+    suppressClickRef.current = false
     dragStateRef.current = {
       ids: hit ? [hit] : [],
       startX: event.clientX,
       startY: event.clientY,
       originCamera: { ...cameraRef.current },
+      originPosition: hit ? { ...positionsRef.current[hit] } : null,
       moved: false,
       draggingNode: Boolean(hit),
     }
@@ -340,10 +349,11 @@ export function GraphView({
         const engine = ensureEngineRef.current ? ensureEngineRef.current() : layoutRef.current
         engine?.dragStart(drag.ids)
       }
-      // 把节点挪到指针处（世界坐标 = 屏幕坐标反变换再减去锚定框中心）
-      const camera = cameraRef.current
-      const worldX = (point.x - camera.x) / camera.scale - 83
-      const worldY = (point.y - camera.y) / camera.scale - 31
+      // mechanics GraphCanvas.move：原始坐标 + 指针世界位移。
+      // 保留抓取偏移，点击圆边缘时不会把圆心瞬移到指针下。
+      const origin = drag.originPosition!
+      const worldX = origin.x + dx / drag.originCamera.scale
+      const worldY = origin.y + dy / drag.originCamera.scale
       const activeEngine = layoutRef.current ?? (ensureEngineRef.current ? ensureEngineRef.current() : null)
       activeEngine?.drag(drag.ids, { [drag.ids[0]]: { x: worldX, y: worldY } })
       positionsRef.current = { ...(layoutRef.current?.positions ?? positionsRef.current) }
@@ -371,6 +381,8 @@ export function GraphView({
       /* 已释放 */
     }
     if (!drag) return
+    // 浏览器在 pointerup 后仍会发 click；不能让它把拖动变成选中。
+    suppressClickRef.current = drag.moved || event.type === 'pointercancel'
 
     if (drag.draggingNode) {
       if (dragStartedRef.current) {
@@ -410,6 +422,10 @@ export function GraphView({
    * 而 click 几乎总会到达。这里只在"没有拖动"时生效，避免拖完误选。
    */
   function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
     if (dragStateRef.current) return
     const point = screenPoint(event)
     const hit = hitTest(nodes, edges, positionsRef.current, cameraRef.current, point.x, point.y)
