@@ -63,6 +63,10 @@ export function GraphView({
   const cameraRef = useRef<GraphCamera>({ x: 0, y: 0, scale: 1 })
   const positionsRef = useRef<Record<string, { x: number; y: number }>>({})
   const layoutRef = useRef<LiveForceLayout | null>(null)
+  /** 拖动时按需建引擎（复用坐标的场景不预先建） */
+  const ensureEngineRef = useRef<(() => LiveForceLayout) | null>(null)
+  /** 本次按下是否已经真正进入拖动（建过引擎） */
+  const dragStartedRef = useRef(false)
   const selectedRef = useRef<string | null>(null)
   const hoveredRef = useRef<string | null>(null)
   const frameRef = useRef<number | null>(null)
@@ -134,6 +138,14 @@ export function GraphView({
     canvas.style.width = `${width}px`
     canvas.style.height = `${height}px`
 
+    // 调试钩子：自动化验证用（不影响正常渲染）
+    ;(window as any).__graphDebug = {
+      positions: positionsRef.current,
+      camera: cameraRef.current,
+      selectedId: selectedRef.current,
+      hasEngine: layoutRef.current !== null,
+    }
+
     drawGraph(context, {
       nodes,
       edges,
@@ -195,24 +207,36 @@ export function GraphView({
     setGraphLabels(nodes)
     resetGraphRenderCache()
 
-    const layout = createLiveForceLayout(nodes, edges, {
-      positions: reusable,
-      fixedNodeIds: reusable ? nodes.map((node) => node.id) : [],
-      onTick: (next) => {
-        positionsRef.current = { ...next }
-        schedulePaint()
-        // 拖动中与冷却期要持续出帧，让邻居的回弹被看见
-        if (frameRef.current === null) schedulePaint()
-      },
-      onSettle: (next) => {
-        positionsRef.current = { ...next }
-        schedulePaint()
-        if (projectId) writeGraphViewState(projectId, { positions: next, topology })
-      },
-      onError: (err) => console.warn('力导向布局出错', err),
-    })
-    layoutRef.current = layout
-    positionsRef.current = { ...layout.positions }
+    /** 建引擎并接到 ref；seed 为空则重新播种，pinAll 用于拖动时固定全图 */
+    const buildEngine = (seed: Record<string, { x: number; y: number }> | null, pinAll: boolean) => {
+      const engine = createLiveForceLayout(nodes, edges, {
+        positions: seed,
+        fixedNodeIds: pinAll ? nodes.map((node) => node.id) : [],
+        onTick: (next) => {
+          positionsRef.current = { ...next }
+          schedulePaint()
+        },
+        onSettle: (next) => {
+          positionsRef.current = { ...next }
+          schedulePaint()
+          if (projectId) writeGraphViewState(projectId, { positions: next, topology })
+        },
+        onError: (err) => console.warn('力导向布局出错', err),
+      })
+      layoutRef.current = engine
+      return engine
+    }
+    ensureEngineRef.current = () => layoutRef.current ?? buildEngine(positionsRef.current, true)
+
+    if (reusable) {
+      // 有上次的坐标：直接用，不建引擎。免得冷却几百毫秒把恢复的布局推歪，
+      // 保留「重开图谱看到同一张图」的承诺。引擎推迟到真正拖动时再建。
+      layoutRef.current = null
+      positionsRef.current = { ...reusable }
+    } else {
+      const engine = buildEngine(null, false)
+      positionsRef.current = { ...engine.positions }
+    }
 
     // 没有可复用的坐标时适配一次相机；复用坐标时沿用上次的相机
     const container = containerRef.current
@@ -220,7 +244,11 @@ export function GraphView({
     if (stored?.camera) {
       cameraRef.current = stored.camera
     } else if (rect) {
-      cameraRef.current = fitCamera(measurePositions(nodes, edges, positionsRef.current), rect.width, rect.height)
+      cameraRef.current = fitCamera(
+        measurePositions(nodes, edges, positionsRef.current),
+        rect.width,
+        rect.height,
+      )
     }
     // 恢复选中：数据变化后已经不存在的节点直接丢弃
     const restoredSelection =
@@ -228,15 +256,15 @@ export function GraphView({
     setSelectedId(restoredSelection)
     selectedRef.current = restoredSelection
 
-    // 立即同步画一次：后台标签页会暂停 requestAnimationFrame，
-    // 只靠 schedulePaint 会出现"数据齐了但画布空着"。
+    // 立即同步画一次：后台标签页会暂停 rAF，只靠 schedulePaint 会画布空着
     paint()
     schedulePaint()
 
     return () => {
-      layout.stop()
+      layoutRef.current?.stop()
       layoutRef.current = null
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topology, projectId])
 
@@ -270,6 +298,7 @@ export function GraphView({
       // 合成事件（自动化测试）没有真实 pointerId，捕获会抛错；不影响后续逻辑
     }
 
+    dragStartedRef.current = false
     dragStateRef.current = {
       ids: hit ? [hit] : [],
       startX: event.clientX,
@@ -279,10 +308,9 @@ export function GraphView({
       draggingNode: Boolean(hit),
     }
 
-    if (hit) {
-      // 节点拖动：交给 mechanics 的仿真把连通分量升温，邻居会弹性跟随
-      layoutRef.current?.dragStart([hit])
-    }
+    // 这里刻意不建引擎、不调用 dragStart：
+    // 单纯点击也会走 pointerdown，若此时启动仿真，冷却会把恢复的布局推歪。
+    // 真正的拖动在 pointermove 越过 CLICK_SLOP 之后才接管。
   }
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -305,11 +333,19 @@ export function GraphView({
     if (!drag.moved && Math.hypot(dx, dy) > CLICK_SLOP) drag.moved = true
 
     if (drag.draggingNode && drag.moved) {
+      // 第一次真正开始拖动：此刻才建引擎并把连通分量升温（邻居弹性跟随）
+      if (!dragStateRef.current || !dragStateRef.current.draggingNode) return
+      if (!dragStartedRef.current) {
+        dragStartedRef.current = true
+        const engine = ensureEngineRef.current ? ensureEngineRef.current() : layoutRef.current
+        engine?.dragStart(drag.ids)
+      }
       // 把节点挪到指针处（世界坐标 = 屏幕坐标反变换再减去锚定框中心）
       const camera = cameraRef.current
       const worldX = (point.x - camera.x) / camera.scale - 83
       const worldY = (point.y - camera.y) / camera.scale - 31
-      layoutRef.current?.drag(drag.ids, { [drag.ids[0]]: { x: worldX, y: worldY } })
+      const activeEngine = layoutRef.current ?? (ensureEngineRef.current ? ensureEngineRef.current() : null)
+      activeEngine?.drag(drag.ids, { [drag.ids[0]]: { x: worldX, y: worldY } })
       positionsRef.current = { ...(layoutRef.current?.positions ?? positionsRef.current) }
       paint()
       return
@@ -337,7 +373,10 @@ export function GraphView({
     if (!drag) return
 
     if (drag.draggingNode) {
-      layoutRef.current?.dragEnd()
+      if (dragStartedRef.current) {
+        layoutRef.current?.dragEnd()
+        dragStartedRef.current = false
+      }
       if (!drag.moved) {
         // 位移在阈值内：判定为点击 → 固定选中
         const id = drag.ids[0]
