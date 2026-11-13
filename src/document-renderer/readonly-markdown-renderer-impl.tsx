@@ -4,11 +4,12 @@ import remarkGfm from 'remark-gfm'
 
 import { createKnownDocumentPathSet, resolveDocumentLink, type DocumentLinkInvalidReason } from '../markdown/document-link'
 import { remarkHeadingIds } from '../markdown/heading-outline'
+import { remarkWikiLinks } from '../markdown/remark-wiki-links'
 import { applyMarkdownTransforms } from '../markdown/markdown-transform'
 import { syncStrongOnlyParagraphClasses } from '../markdown/strong-only-paragraph'
 import { MermaidDiagram } from './mermaid-diagram'
 
-const REMARK_PLUGINS = [remarkGfm, remarkHeadingIds]
+const REMARK_PLUGINS = [remarkGfm, remarkWikiLinks, remarkHeadingIds]
 
 interface ReadonlyMarkdownRendererImplProps {
   value: string
