@@ -84,6 +84,8 @@ export function GraphView({
   const selectedRef = useRef<string | null>(null)
   const hoveredRef = useRef<string | null>(null)
   const frameRef = useRef<number | null>(null)
+  const animateFlowRef = useRef(false)
+  const [reduceMotion, setReduceMotion] = useState(false)
   const reduceMotionRef = useRef(false)
   /** 本次按下是否已经变成拖动：决定 pointerup 走"点击"还是"结束拖动" */
   const dragStateRef = useRef<{
@@ -186,13 +188,29 @@ export function GraphView({
    * 那时拖动、冷却、悬停都不会重绘，画面停在旧帧。16ms 定时在前台几乎等价，
    * 后台也能继续出帧。
    */
-  const schedulePaint = useCallback(() => {
+  const schedulePaint = useCallback(function requestPaint() {
     if (frameRef.current !== null) return
     frameRef.current = window.setTimeout(() => {
       frameRef.current = null
       paint()
+      // 光点只需要更新像素，不依赖力布局 tick，也不启动仿真。
+      if (animateFlowRef.current) requestPaint()
     }, 16)
   }, [paint])
+
+  // 切换图数据或卸载时取消旧闭包的帧，避免旧图覆盖新图。
+  useEffect(() => () => {
+    if (frameRef.current !== null) window.clearTimeout(frameRef.current)
+    frameRef.current = null
+  }, [schedulePaint])
+
+  useEffect(() => {
+    animateFlowRef.current = !reduceMotion && edges.some(edge =>
+      edge.source === selectedId || edge.target === selectedId
+      || edge.source === hoveredId || edge.target === hoveredId)
+    schedulePaint()
+    return () => { animateFlowRef.current = false }
+  }, [edges, selectedId, hoveredId, reduceMotion, schedulePaint])
 
   // 文字选项只触发重绘，仿真中的回调也读取最新值，不重建布局或相机。
   useEffect(() => {
@@ -210,8 +228,10 @@ export function GraphView({
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     reduceMotionRef.current = Boolean(media?.matches)
+    setReduceMotion(reduceMotionRef.current)
     const onChange = () => {
       reduceMotionRef.current = Boolean(media?.matches)
+      setReduceMotion(reduceMotionRef.current)
       schedulePaint()
     }
     media?.addEventListener?.('change', onChange)
@@ -503,12 +523,6 @@ export function GraphView({
     }
     // 已固定的选中不因移开而清除
   }
-
-  useEffect(() => {
-    return () => {
-      if (frameRef.current !== null) window.clearTimeout(frameRef.current)
-    }
-  }, [])
 
   /* -------------------------------------------------- 信息面板 */
 

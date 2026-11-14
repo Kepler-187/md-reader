@@ -140,6 +140,70 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+it('keeps repainting selected edges beyond five seconds without moving restored nodes, and cleans up on unmount', () => {
+  const view = render(<GraphView {...props} />)
+  advance(3000)
+  const count = vi.mocked(drawGraph).mock.calls.length
+  advance(2500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBeGreaterThan(count + 100)
+  expect(debug()).toMatchObject({ positions, camera, selectedId: 'b.md', hasEngine: false })
+  view.unmount()
+  const stopped = vi.mocked(drawGraph).mock.calls.length
+  advance(1000)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(stopped)
+})
+
+it('runs flow for hovering connected nodes and stops when neither hover nor selection remains', () => {
+  const { container } = render(<GraphView {...props} />)
+  fireEvent.click(screen.getByRole('button', { name: '取消选中' }))
+  advance(32)
+  const stopped = vi.mocked(drawGraph).mock.calls.length
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(stopped)
+  const canvas = container.querySelector('.graph-view__canvas')!
+  fireEvent.pointerMove(canvas, { clientX: 183, clientY: 131 })
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBeGreaterThan(stopped + 10)
+  fireEvent.pointerLeave(canvas)
+  advance(32)
+  const left = vi.mocked(drawGraph).mock.calls.length
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(left)
+})
+
+it('stops and resumes flow when reduced motion changes', () => {
+  let change = () => {}
+  const media = { matches: true, addEventListener: (_: string, callback: () => void) => { change = callback }, removeEventListener: vi.fn() }
+  vi.stubGlobal('matchMedia', () => media)
+  const view = render(<GraphView {...props} />)
+  advance(32)
+  const count = vi.mocked(drawGraph).mock.calls.length
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(count)
+  expect(vi.mocked(drawGraph).mock.lastCall?.[1].reduceMotion).toBe(true)
+  act(() => { media.matches = false; change() })
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBeGreaterThan(count + 10)
+  act(() => { media.matches = true; change() })
+  advance(32)
+  const stopped = vi.mocked(drawGraph).mock.calls.length
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(stopped)
+  view.unmount()
+  expect(media.removeEventListener).toHaveBeenCalled()
+})
+
+it('stops the old edge animation when refreshed data has no edges', () => {
+  const view = render(<GraphView {...props} />)
+  advance(100)
+  view.rerender(<GraphView {...props} index={{ ...index, nodes: [], edges: [] }} />)
+  advance(32)
+  const stopped = vi.mocked(drawGraph).mock.calls.length
+  advance(500)
+  expect(vi.mocked(drawGraph).mock.calls.length).toBe(stopped)
+  expect(vi.mocked(drawGraph).mock.lastCall?.[1].edges).toEqual([])
+})
+
 it('restored drag heats neighbors, preserves grab offset, cools after release and does not select on trailing click', () => {
   const { container } = render(<GraphView {...props} />)
   const canvas = container.querySelector('.graph-view__canvas')!
