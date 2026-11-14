@@ -18,6 +18,36 @@ const props = { index, projectId: 'drag-regression', loading: false, error: null
 const debug = () => (window as any).__graphDebug
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms))
 
+it('enables neighborhood after selecting a graph node without first opening an article', () => {
+  writeGraphViewState(props.projectId, { selectedId: null })
+  const { container } = render(<GraphView {...props} currentDocumentPath={null} />)
+  expect(screen.getByRole('button', { name: '当前文档邻近' })).toBeDisabled()
+  const canvas = container.querySelector('.graph-view__canvas')!
+  fireEvent.pointerDown(canvas, { button: 0, clientX: 183, clientY: 131 })
+  fireEvent.pointerUp(canvas, { button: 0, clientX: 183, clientY: 131 })
+  fireEvent.click(canvas, { clientX: 183, clientY: 131 })
+  expect(readGraphViewState(props.projectId)?.selectedId).toBe('a.md')
+  expect(screen.getByRole('button', { name: '当前文档邻近' })).toBeEnabled()
+  fireEvent.click(screen.getByRole('button', { name: '当前文档邻近' }))
+  advance(32)
+  expect(Object.keys(debug().positions).sort()).toEqual(['a.md', 'b.md'])
+  expect(debug().selectedId).toBe('a.md')
+  expect(screen.getByText('已固定')).toBeInTheDocument()
+})
+
+it('uses the selected node ahead of the last read article, with that article as fallback', () => {
+  const first = render(<GraphView {...props} currentDocumentPath="c.md" />)
+  fireEvent.click(screen.getByRole('button', { name: '当前文档邻近' }))
+  advance(32)
+  expect(Object.keys(debug().positions).sort()).toEqual(['a.md', 'b.md'])
+  first.unmount()
+  writeGraphViewState(props.projectId, { positions, camera, topology: graphTopologyKey(nodes.map(n => n.id), edges), selectedId: null })
+  render(<GraphView {...props} currentDocumentPath="c.md" />)
+  fireEvent.click(screen.getByRole('button', { name: '当前文档邻近' }))
+  advance(32)
+  expect(Object.keys(debug().positions).sort()).toEqual(['c.md', 'd.md'])
+})
+
 it('shows navigation on first open and restores an explicit filter change from the store', () => {
   clearGraphViewState(props.projectId)
   const first = render(<GraphView {...props} />)

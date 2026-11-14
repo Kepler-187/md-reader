@@ -4,7 +4,7 @@ import type { LinkIndexPayload } from '../workspace/local-bridge-access'
 import { createLiveForceLayout, measurePositions, type LiveForceLayout } from './forceAdapter'
 import { drawGraph, hitTest, resetGraphRenderCache, type GraphCamera } from './graphRenderer'
 import { graphTopologyKey, readGraphViewState, reconcileGraphViewState, writeGraphViewState } from './graphViewStore'
-import { buildGraphView, type LaidOutNode } from './linkGraphAdapter'
+import { buildGraphView, isNavigationNode, type LaidOutNode } from './linkGraphAdapter'
 
 interface GraphViewProps {
   index: LinkIndexPayload | null
@@ -51,6 +51,7 @@ export function GraphView({
   onEnterDocument,
 }: GraphViewProps) {
   const [scope, setScope] = useState<'global' | 'local'>('global')
+  const [localFocusPath, setLocalFocusPath] = useState<string | null>(null)
   const [hops, setHops] = useState(1)
   const [includeIsolated, setIncludeIsolated] = useState(() => projectId ? readGraphViewState(projectId)?.includeIsolated ?? false : false)
   const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? true : true)
@@ -60,6 +61,7 @@ export function GraphView({
   /** 固定选中的节点：点击后保留，鼠标移开不消失 */
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const neighborhoodPath = [selectedId, currentDocumentPath].find(path => path && index?.nodes.some(node => node.id === path)) ?? null
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -100,7 +102,7 @@ export function GraphView({
     try {
       return buildGraphView(index, {
         scope,
-        focusPath: currentDocumentPath,
+        focusPath: localFocusPath,
         hops,
         includeIsolated,
         includeNavigation,
@@ -109,7 +111,7 @@ export function GraphView({
       console.warn('图谱布局失败', err)
       return null
     }
-  }, [index, scope, currentDocumentPath, hops, includeIsolated, includeNavigation])
+  }, [index, scope, localFocusPath, hops, includeIsolated, includeNavigation])
 
   const nodes: LaidOutNode[] = view?.nodes ?? []
   const edges = view?.edges ?? []
@@ -404,6 +406,7 @@ export function GraphView({
         const id = drag.ids[0]
         setSelectedId((prev) => (prev === id ? prev : id))
         selectedRef.current = id
+        if (projectId) writeGraphViewState(projectId, { selectedId: id, positions: positionsRef.current, camera: cameraRef.current, topology })
         schedulePaint()
       } else if (projectId) {
         writeGraphViewState(projectId, {
@@ -421,6 +424,7 @@ export function GraphView({
       // 点空白取消选中
       setSelectedId(null)
       selectedRef.current = null
+      if (projectId) writeGraphViewState(projectId, { selectedId: null, positions: positionsRef.current, camera: cameraRef.current, topology })
       schedulePaint()
     }
   }
@@ -517,6 +521,24 @@ export function GraphView({
     onEnterDocument(selectedId)
   }, [onEnterDocument, projectId, selectedId, topology])
 
+  function handleLocalScope() {
+    if (!neighborhoodPath) return
+    // 进入邻近视图时确定中心；在局部图内悬停、选中不会反复重排。
+    setLocalFocusPath(neighborhoodPath)
+    const navigation = includeNavigation || isNavigationNode(neighborhoodPath)
+    const connected = index?.edges.some(edge =>
+      (edge.source === neighborhoodPath || edge.target === neighborhoodPath)
+      && (navigation || (!isNavigationNode(edge.source) && !isNavigationNode(edge.target))))
+    setIncludeNavigation(navigation)
+    setIncludeIsolated(includeIsolated || !connected)
+    if (projectId) writeGraphViewState(projectId, {
+      selectedId: selectedRef.current,
+      includeNavigation: navigation,
+      includeIsolated: includeIsolated || !connected,
+    })
+    setScope('local')
+  }
+
   return (
     <div className="graph-view">
       <div className="graph-view__toolbar">
@@ -533,9 +555,9 @@ export function GraphView({
             type="button"
             className="graph-view__chip"
             data-active={scope === 'local' || undefined}
-            onClick={() => setScope('local')}
-            disabled={!currentDocumentPath}
-            title={currentDocumentPath ? undefined : '先打开一篇文档'}
+            onClick={handleLocalScope}
+            disabled={!neighborhoodPath}
+            title={neighborhoodPath ? `查看邻近关系：${neighborhoodPath}` : '先在图谱中选中一个节点，或打开一篇文档'}
           >
             当前文档邻近
           </button>

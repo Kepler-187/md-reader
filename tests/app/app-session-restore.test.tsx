@@ -133,6 +133,33 @@ vi.mock('../../src/editor/visual-markdown-editor', () => ({
 import App from '../../src/App'
 
 describe('App session restore', () => {
+  it.each(['docs/guide.md', 'docs/new.md'])('opens %s from the file tree into locked reading while the graph is open', async path => {
+    const user = userEvent.setup()
+    const context = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+    vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+    try {
+      bridgeMocks.getFileTreePathsFromBridge.mockResolvedValue(['docs/guide.md', 'docs/next.md', 'docs/new.md'])
+      const original = bridgeMocks.getDocumentContentFromBridge.getMockImplementation()!
+      bridgeMocks.getDocumentContentFromBridge.mockImplementation(async (project, profile, target) => target === 'docs/new.md'
+        ? { path: target, content: '# New\n\nNew body', mtimeMs: 300, size: 15 }
+        : original(project, profile, target))
+      const { container } = render(<App />)
+      await screen.findByRole('tab', { name: 'next' })
+      await user.click(screen.getByRole('button', { name: '关系图谱' }))
+      expect(container.querySelector('.graph-view')).toBeInTheDocument()
+      await user.click(await screen.findByRole('button', { name: path.split('/').at(-1)! }))
+      await waitFor(() => expect(container.querySelector('.graph-view')).not.toBeInTheDocument())
+      expect(await screen.findByRole('button', { name: '解锁' })).toBeInTheDocument()
+      expect(await screen.findByText(path === 'docs/new.md' ? 'New body' : 'Guide body')).toBeInTheDocument()
+      await waitFor(() => expect(bridgeMocks.saveState).toHaveBeenCalledWith('notes', 'default', expect.objectContaining({
+        activeDocumentPath: path, activeMode: 'regular', regularViewState: 'locked',
+      })))
+    } finally {
+      context.mockRestore()
+      vi.unstubAllGlobals()
+    }
+  })
+
   beforeEach(() => {
     window.history.replaceState(null, '', 'http://localhost:3000/')
     localState.openDocumentPaths = ['docs/guide.md', 'docs/next.md']
