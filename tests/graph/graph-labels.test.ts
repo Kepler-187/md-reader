@@ -45,3 +45,23 @@ it('forces matching labels at low zoom without selecting nodes or hiding navigat
   expect(renderLabels(ids, { searchMatches: new Set() })).toEqual(['INDEX.md'])
   expect(renderLabels(ids, { searchMatches: null })).toEqual(['INDEX.md'])
 })
+
+it.each([0.06, 0.2, 1])('always labels selected one-hop incoming and outgoing neighbors despite collisions at scale %s', scale => {
+  const ids = ['center.md', 'incoming.md', 'outgoing.md', 'two-hops.md', 'unrelated.md']
+  const edges = [
+    { source: ids[1], target: ids[0] },
+    { source: ids[0], target: ids[2] },
+    { source: ids[2], target: ids[3] },
+  ]
+  const labels = renderLabels(ids, { edges, selectedId: ids[0], camera: { x: 0, y: 0, scale } })
+  expect(labels).toEqual(expect.arrayContaining(ids.slice(0, 3)))
+  expect(labels).not.toContain(ids[3])
+  expect(labels).not.toContain(ids[4])
+  expect(renderLabels(ids, { edges, selectedId: null, camera: { x: 0, y: 0, scale } })).not.toContain(ids[1])
+})
+
+it('does not drop selected neighbors past the ordinary label limit', () => {
+  const ids = ['center.md', ...Array.from({ length: 405 }, (_, i) => `neighbor-${i}.md`)]
+  const edges = ids.slice(1).map(target => ({ source: ids[0], target }))
+  expect(renderLabels(ids, { edges, selectedId: ids[0] })).toHaveLength(ids.length)
+})

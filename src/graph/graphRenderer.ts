@@ -555,8 +555,8 @@ function drawLabels(
 
   let drawn = 0
   for (const item of shown) {
-    // 导航名称始终可读，不受缩放、聚焦、避让或普通标签数量上限隐藏。
-    const forced = item.navigation || item.matched || item.focus || item.hovered
+    // 选中节点的一跳邻居与导航、搜索命中一样必显，不能再被避让或数量上限隐藏。
+    const forced = item.navigation || item.matched || item.focus || item.hovered || (attention && related.has(item.id))
     if (drawn >= 400 && !forced) continue
     const style =
       item.tier === 'core'
