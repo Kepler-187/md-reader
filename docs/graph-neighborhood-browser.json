@@ -1,0 +1,29 @@
+{
+  "neighborhood": {
+    "tabs": 0,
+    "selected": "writing/_MOC/美国社会研究：为黑墙之下准备的真实素材.md",
+    "meta": "10 节点 · 11 连线",
+    "localButton": [
+      {
+        "disabled": false,
+        "active": "true",
+        "title": "查看邻近关系：writing/_MOC/美国社会研究：为黑墙之下准备的真实素材.md"
+      }
+    ],
+    "panel": "美国社会研究：为黑墙之下准备的真实素材已固定路径writing/_MOC/美国社会研究：为黑墙之下准备的真实素材.md链接数9标签MOC、黑墙之下、美国研究进入文章取消选中"
+  },
+  "fileTree": {
+    "graphVisible": false,
+    "url": "http://127.0.0.1:8798/?project=library-c6c86f25&profile=default",
+    "headings": [
+      "库说明"
+    ],
+    "unlockButton": true,
+    "lockTitle": [
+      "解锁"
+    ],
+    "tabs": [
+      "README"
+    ]
+  }
+}
