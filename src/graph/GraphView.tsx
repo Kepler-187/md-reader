@@ -5,6 +5,7 @@ import { createLiveForceLayout, measurePositions, type LiveForceLayout } from '.
 import { drawGraph, hitTest, resetGraphRenderCache, type GraphCamera } from './graphRenderer'
 import { graphTopologyKey, readGraphViewState, reconcileGraphViewState, writeGraphViewState } from './graphViewStore'
 import { buildGraphView, isNavigationNode, type LaidOutNode } from './linkGraphAdapter'
+import { searchGraphNodes } from './graphSearch'
 
 interface GraphViewProps {
   index: LinkIndexPayload | null
@@ -57,6 +58,13 @@ export function GraphView({
   const [includeNavigation, setIncludeNavigation] = useState(() => projectId ? readGraphViewState(projectId)?.includeNavigation ?? true : true)
   const [showFullPath, setShowFullPath] = useState(() => projectId ? readGraphViewState(projectId)?.showFullPath ?? false : false)
   const showFullPathRef = useRef(showFullPath)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const composingRef = useRef(false)
+  const searchActive = Boolean(searchQuery.trim())
+  const searchResults = useMemo(() => searchGraphNodes(index?.nodes ?? [], searchQuery), [index, searchQuery])
+  const searchMatches = useMemo(() => searchActive ? new Set(searchResults.map(node => node.id)) : null, [searchActive, searchResults])
+  const searchMatchesRef = useRef<ReadonlySet<string> | null>(null)
 
   /** 固定选中的节点：点击后保留，鼠标移开不消失 */
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -167,6 +175,7 @@ export function GraphView({
       highlightDepth: 1,
       reduceMotion: reduceMotionRef.current,
       showFullPath: showFullPathRef.current,
+      searchMatches: searchMatchesRef.current,
     })
   }, [nodes, edges])
 
@@ -190,6 +199,11 @@ export function GraphView({
     showFullPathRef.current = showFullPath
     schedulePaint()
   }, [showFullPath, schedulePaint])
+
+  useEffect(() => {
+    searchMatchesRef.current = searchMatches
+    schedulePaint()
+  }, [searchMatches, schedulePaint])
 
   /* -------------------------------------------------- 布局与状态恢复 */
 
@@ -539,6 +553,20 @@ export function GraphView({
     setScope('local')
   }
 
+  const visibleMatches = searchResults.filter(node => nodeById.has(node.id)).length
+
+  function selectSearchResult(id: string) {
+    if (!nodeById.has(id)) return
+    selectedRef.current = id
+    setSelectedId(id)
+    setHoveredId(null)
+    hoveredRef.current = null
+    if (projectId) writeGraphViewState(projectId, {
+      selectedId: id, positions: positionsRef.current, camera: cameraRef.current, topology,
+    })
+    schedulePaint()
+  }
+
   return (
     <div className="graph-view">
       <div className="graph-view__toolbar">
@@ -601,6 +629,42 @@ export function GraphView({
           }} />
           显示完整路径
         </label>
+        <div className="graph-view__search">
+          <input type="search" aria-label="图谱搜索" placeholder="搜索标题 / 文件名" value={searchInput}
+            onCompositionStart={() => { composingRef.current = true }}
+            onCompositionEnd={event => {
+              composingRef.current = false
+              setSearchQuery(event.currentTarget.value)
+            }}
+            onChange={event => {
+              setSearchInput(event.target.value)
+              if (!composingRef.current) setSearchQuery(event.target.value)
+            }}
+            onKeyDown={event => {
+              if (event.key === 'Escape' && !composingRef.current) {
+                setSearchInput('')
+                setSearchQuery('')
+              }
+            }} />
+          {searchActive ? <div className="graph-view__search-results">
+            <p role="status">{searchResults.length ? `匹配 ${searchResults.length} · 当前显示 ${visibleMatches} · 隐藏 ${searchResults.length - visibleMatches}` : '没有匹配的标题或文件名'}</p>
+            {visibleMatches < searchResults.length ? <>
+              <p>部分结果被导航、孤立节点或邻近范围隐藏。</p>
+              <button type="button" className="graph-view__chip" onClick={() => {
+                setScope('global')
+                setIncludeNavigation(true)
+                setIncludeIsolated(true)
+                if (projectId) writeGraphViewState(projectId, { includeNavigation: true, includeIsolated: true })
+              }}>切到全局并显示隐藏节点</button>
+            </> : null}
+            <ul>{searchResults.map(node => <li key={node.id}>
+              <button type="button" disabled={!nodeById.has(node.id)} onClick={() => selectSearchResult(node.id)}>
+                <strong>{node.title || node.path.split('/').at(-1)}</strong>{' '}
+                <small>{node.path}{nodeById.has(node.id) ? '' : '（已隐藏）'}</small>
+              </button>
+            </li>)}</ul>
+          </div> : null}
+        </div>
         <div className="graph-view__group graph-view__group--right">
           <span className="graph-view__meta">
             {nodes.length ? `${nodes.length} 节点 · ${edges.length} 连线` : '—'}

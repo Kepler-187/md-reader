@@ -38,3 +38,10 @@ it('shows the entire project path when requested, including long paths and dupli
   const ids = ['INDEX.md', 'work/INDEX.md', 'writing/_MOC/超过二十二字并且不能被截断的导航页面名称.md']
   expect(renderLabels(ids, { showFullPath: true })).toEqual(ids)
 })
+
+it('forces matching labels at low zoom without selecting nodes or hiding navigation labels', () => {
+  const ids = ['INDEX.md', 'notes/a.md', 'notes/b.md']
+  expect(renderLabels(ids, { searchMatches: new Set([ids[1]]) })).toEqual(['INDEX.md', 'a.md'])
+  expect(renderLabels(ids, { searchMatches: new Set() })).toEqual(['INDEX.md'])
+  expect(renderLabels(ids, { searchMatches: null })).toEqual(['INDEX.md'])
+})

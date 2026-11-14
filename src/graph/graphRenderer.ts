@@ -49,6 +49,7 @@ interface VisibleNode {
   id: string
   label: string
   navigation: boolean
+  matched: boolean
   cx: number
   cy: number
   radius: number
@@ -156,6 +157,8 @@ export interface GraphRenderInput {
   reduceMotion?: boolean
   /** 默认只显示文件名；勾选后显示项目内完整路径。 */
   showFullPath?: boolean
+  /** null 表示未搜索；空集合表示正在搜索但没有命中。 */
+  searchMatches?: ReadonlySet<string> | null
   now?: number
 }
 
@@ -354,7 +357,9 @@ export function drawGraph(context: CanvasRenderingContext2D, input: GraphRenderI
     const isRelated = focus.relatedNodes.has(node.id)
     const isHovered = hoveredId === node.id
 
-    const alpha = focus.attention && !isRelated ? 0.28 : 1
+    const matched = input.searchMatches?.has(node.id) ?? false
+    const alpha = matched || isCenter || isHovered ? 1
+      : input.searchMatches ? 0.22 : focus.attention && !isRelated ? 0.28 : 1
     const restFill =
       tier === 'core' ? palette.core : tier === 'secondary' ? palette.secondary : palette.soft
     const restStroke =
@@ -363,7 +368,7 @@ export function drawGraph(context: CanvasRenderingContext2D, input: GraphRenderI
         : tier === 'secondary'
           ? palette.secondaryStroke
           : palette.softStroke
-    const focusNow = isCenter || (focus.attention && isRelated) || isHovered
+    const focusNow = matched || isCenter || (focus.attention && isRelated) || isHovered
     const fill = focusNow ? (tier === 'normal' ? palette.vivid : restFill) : restFill
     const stroke = isCenter ? '#1f4d3e' : restStroke
     const lineWidth = (isCenter ? 2 : tier === 'core' ? 1.75 : tier === 'secondary' ? 1.25 : 1) * pixel
@@ -377,6 +382,7 @@ export function drawGraph(context: CanvasRenderingContext2D, input: GraphRenderI
       id: node.id,
       label: input.showFullPath ? node.id : node.id.replaceAll('\\', '/').split('/').at(-1) || node.id,
       navigation: isNavigationNode(node.id),
+      matched,
       cx,
       cy,
       radius,
@@ -443,6 +449,9 @@ export function drawGraph(context: CanvasRenderingContext2D, input: GraphRenderI
     4,
     0.9,
   )
+  context.globalAlpha = 1
+
+  ring(visibleNodes.filter(item => item.matched), palette.coreStroke, 2.5, 8, 1)
   context.globalAlpha = 1
 
   drawLabels(context, visibleNodes, {
@@ -522,6 +531,7 @@ function drawLabels(
   const priority = (item: VisibleNode) =>
     (item.focus || item.hovered ? 1e6 : 0) +
     (item.navigation ? 5e5 : 0) +
+    (item.matched ? 4e5 : 0) +
     (attention && related.has(item.id) ? 1e5 : 0) +
     ({ core: 2e4, secondary: 1e4, normal: 0 }[item.tier] ?? 0)
 
@@ -529,6 +539,7 @@ function drawLabels(
     .filter(
       (item) =>
         item.navigation ||
+        item.matched ||
         item.focus ||
         item.hovered ||
         (attention && related.has(item.id)) ||
@@ -545,7 +556,7 @@ function drawLabels(
   let drawn = 0
   for (const item of shown) {
     // 导航名称始终可读，不受缩放、聚焦、避让或普通标签数量上限隐藏。
-    const forced = item.navigation || item.focus || item.hovered
+    const forced = item.navigation || item.matched || item.focus || item.hovered
     if (drawn >= 400 && !forced) continue
     const style =
       item.tier === 'core'
