@@ -62,6 +62,7 @@ if (isMainModule()) {
 
 export async function startBridgeServer({
   port = DEFAULT_PORT,
+  host = "127.0.0.1",
   runtimeHome = defaultRuntimeHome(),
   stateFile,
   webMode = "dev",
@@ -95,7 +96,9 @@ export async function startBridgeServer({
 
   await new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, "127.0.0.1", resolve);
+    // host 可传：默认只绑回环。不要为了绕过端口冲突改成 0.0.0.0/::——
+    // 这个服务没有鉴权，绑到非回环等于局域网内谁都能读写内容库。
+    server.listen(port, host, resolve);
   });
 
   server.__mdReaderWebUiRuntime = webUiRuntime;

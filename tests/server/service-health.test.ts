@@ -41,6 +41,52 @@ describe('bridge service health', () => {
       nonce: 'test-nonce',
     })
   })
+
+  it('binds the loopback host by default', async () => {
+    const runtimeHome = await mkdtemp(path.join(os.tmpdir(), 'md-reader-health-host-'))
+    const port = await getAvailablePort()
+    const server = await startBridgeServer({ runtimeHome, port, webMode: 'none' })
+    cleanups.push(async () => {
+      await stopBridgeServer(server, { runtimeHome })
+      await rm(runtimeHome, { recursive: true, force: true })
+    })
+
+    const address = server.address()
+    expect(typeof address === 'object' && address ? address.address : null).toBe('127.0.0.1')
+  })
+
+  it('accepts an explicit host argument', async () => {
+    const runtimeHome = await mkdtemp(path.join(os.tmpdir(), 'md-reader-health-host2-'))
+    const port = await getAvailablePort()
+    const server = await startBridgeServer({ runtimeHome, port, host: '0.0.0.0', webMode: 'none' })
+    cleanups.push(async () => {
+      await stopBridgeServer(server, { runtimeHome })
+      await rm(runtimeHome, { recursive: true, force: true })
+    })
+
+    const address = server.address()
+    expect(typeof address === 'object' && address ? address.address : null).toBe('0.0.0.0')
+  })
+
+  it('surfaces a bind error instead of hanging', async () => {
+    const runtimeHome = await mkdtemp(path.join(os.tmpdir(), 'md-reader-health-busy-'))
+    const port = await getAvailablePort()
+
+    // 先占住端口，再让 bridge 去绑同一个号，应当抛错而不是挂住
+    const blocker = net.createServer()
+    await new Promise<void>((resolve, reject) => {
+      blocker.once('error', reject)
+      blocker.listen(port, '127.0.0.1', resolve)
+    })
+    cleanups.push(async () => {
+      await new Promise<void>((resolve) => blocker.close(() => resolve()))
+      await rm(runtimeHome, { recursive: true, force: true })
+    })
+
+    await expect(startBridgeServer({ runtimeHome, port, webMode: 'none' })).rejects.toMatchObject({
+      code: 'EADDRINUSE',
+    })
+  })
 })
 
 async function getAvailablePort(): Promise<number> {
