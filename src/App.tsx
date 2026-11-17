@@ -31,6 +31,7 @@ import {
   removeNodeFromManualOrder,
 } from './workspace/file-tree-order'
 import { createContentHash } from './shared/content-hash'
+import { copyText } from './shared/clipboard'
 import type { FileTreeNode } from './workspace/file-tree-types'
 import type { ProjectTreeDocumentEntry } from './workspace/local-bridge-access'
 import {
@@ -2312,7 +2313,7 @@ function App() {
         throw new Error('当前没有可分享的项目')
       }
       const href = createDocumentShareHref(projectId, activeProfileIdRef.current, documentPath, null)
-      await navigator.clipboard.writeText(href)
+      await copyText(href)
       publishActionFeedback(`已拷贝链接：${href}`)
     } catch (error) {
       publishActionFeedback(
@@ -2351,7 +2352,7 @@ function App() {
 
   async function handleCopyDirectoryPath(directoryPath: string) {
     try {
-      await navigator.clipboard.writeText(directoryPath)
+      await copyText(directoryPath)
       publishActionFeedback(`已拷贝路径：${directoryPath}`)
     } catch (error) {
       publishActionFeedback(
